@@ -682,36 +682,64 @@ function efficiency(config, deltaT, returnTemp) {
   const returnScore = clamp((merged.max_return_temp - returnTemp) / (merged.max_return_temp - merged.good_return_temp || 1) * 100);
   const score = deltaScore * 0.55 + returnScore * 0.45;
   const severity = severityFromScore(score, deltaT, returnTemp, merged.min_delta_t, merged.max_return_temp);
+  const message = efficiencyMessage(severity, deltaT, returnTemp, merged.min_delta_t, merged.good_delta_t, merged.max_return_temp, merged.good_return_temp);
   const copy = {
     excellent: {
-      title: "Meget effektiv udnyttelse",
-      message: "Lav returtemperatur og god afkøling. Dit anlæg kører optimalt."
+      title: "Meget effektiv udnyttelse"
     },
     good: {
-      title: "God udnyttelse",
-      message: "Anlægget har en sund balance mellem afkøling og returtemperatur."
+      title: "God udnyttelse"
     },
     warning: {
-      title: "Kan optimeres",
-      message: "Hold øje med returtemperatur og afkøling. Justering kan forbedre udnyttelsen."
+      title: "Kan optimeres"
     },
     critical: {
-      title: "Lav effektivitet",
-      message: "Høj returtemperatur eller lav afkøling tyder på, at anlægget bør gennemgås."
+      title: "Lav effektivitet"
     },
     unknown: {
-      title: "Mangler data",
-      message: "Tilføj flere sensorer for at vurdere driften."
+      title: "Mangler data"
     }
   };
   return {
     severity,
     ...copy[severity],
+    message,
     deltaLabel: deltaT >= merged.good_delta_t ? "Meget god" : deltaT >= merged.min_delta_t ? "God" : "Lav",
     returnLabel: returnTemp <= merged.good_return_temp ? "Meget god" : returnTemp <= merged.max_return_temp ? "God" : "Høj",
     deltaScore,
     returnScore
   };
+}
+function efficiencyMessage(severity, deltaT, returnTemp, minDeltaT, goodDeltaT, maxReturnTemp, goodReturnTemp) {
+  const lowDelta = deltaT < minDeltaT;
+  const highReturn = returnTemp > maxReturnTemp;
+  const notGoodDelta = deltaT < goodDeltaT;
+  const notGoodReturn = returnTemp > goodReturnTemp;
+  if (lowDelta && highReturn) {
+    return `Afkølingen er under ${minDeltaT.toFixed(1)} °C, og returtemperaturen er over ${maxReturnTemp.toFixed(1)} °C.`;
+  }
+  if (lowDelta) {
+    return `Afkølingen er under minimum på ${minDeltaT.toFixed(1)} °C. Returtemperaturen er acceptabel.`;
+  }
+  if (highReturn) {
+    return `Returtemperaturen er over maksimum på ${maxReturnTemp.toFixed(1)} °C. Afkølingen er acceptabel.`;
+  }
+  if (severity === "excellent") {
+    return `Afkølingen er over ${goodDeltaT.toFixed(1)} °C, og returtemperaturen er under ${goodReturnTemp.toFixed(1)} °C.`;
+  }
+  if (severity === "good") {
+    return "Afkøling og returtemperatur ligger i et sundt område.";
+  }
+  if (notGoodDelta && notGoodReturn) {
+    return `Afkøling og returtemperatur er acceptable, men ikke i det gode område endnu.`;
+  }
+  if (notGoodDelta) {
+    return `Afkølingen er acceptabel, men under målet på ${goodDeltaT.toFixed(1)} °C.`;
+  }
+  if (notGoodReturn) {
+    return `Returtemperaturen er acceptabel, men over målet på ${goodReturnTemp.toFixed(1)} °C.`;
+  }
+  return "Anlægget kører inden for de valgte grænser.";
 }
 function flowColor(value, lowTemp, highTemp, lowColor, highColor) {
   if (value === void 0) {
@@ -1465,7 +1493,9 @@ let DistrictHeatingCardEditor = class extends i {
         class="field"
         .label=${label}
         .value=${((_a2 = this.config) == null ? void 0 : _a2[key]) ?? ""}
-        @input=${(event) => this.updateConfig(key, event.currentTarget.value)}
+        @input=${(event) => this.updateConfig(key, this.eventValue(event))}
+        @change=${(event) => this.updateConfig(key, this.eventValue(event))}
+        @value-changed=${(event) => this.updateConfig(key, event.detail.value)}
       ></ha-textfield>
     `;
   }
@@ -1475,14 +1505,21 @@ let DistrictHeatingCardEditor = class extends i {
       <ha-textfield
         class="field"
         type="number"
+        step="0.1"
         .label=${label}
         .value=${String(((_a2 = this.config) == null ? void 0 : _a2[key]) ?? "")}
-        @input=${(event) => {
-      const value = Number.parseFloat(event.currentTarget.value);
-      this.updateConfig(key, Number.isFinite(value) ? value : void 0);
-    }}
+        @input=${(event) => this.updateNumberConfig(key, this.eventValue(event))}
+        @change=${(event) => this.updateNumberConfig(key, this.eventValue(event))}
+        @value-changed=${(event) => this.updateNumberConfig(key, event.detail.value)}
       ></ha-textfield>
     `;
+  }
+  eventValue(event) {
+    return String(event.currentTarget.value ?? "");
+  }
+  updateNumberConfig(key, rawValue) {
+    const value = Number.parseFloat(String(rawValue ?? "").replace(",", "."));
+    this.updateConfig(key, Number.isFinite(value) ? value : void 0);
   }
   updateConfig(key, value) {
     if (!this.config) {

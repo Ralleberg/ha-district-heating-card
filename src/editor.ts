@@ -81,7 +81,9 @@ export class DistrictHeatingCardEditor extends LitElement {
         class="field"
         .label=${label}
         .value=${this.config?.[key] ?? ""}
-        @input=${(event: InputEvent) => this.updateConfig(key, (event.currentTarget as HTMLInputElement).value)}
+        @input=${(event: InputEvent) => this.updateConfig(key, this.eventValue(event))}
+        @change=${(event: Event) => this.updateConfig(key, this.eventValue(event))}
+        @value-changed=${(event: CustomEvent) => this.updateConfig(key, event.detail.value)}
       ></ha-textfield>
     `;
   }
@@ -91,14 +93,23 @@ export class DistrictHeatingCardEditor extends LitElement {
       <ha-textfield
         class="field"
         type="number"
+        step="0.1"
         .label=${label}
         .value=${String(this.config?.[key] ?? "")}
-        @input=${(event: InputEvent) => {
-          const value = Number.parseFloat((event.currentTarget as HTMLInputElement).value);
-          this.updateConfig(key, Number.isFinite(value) ? value : undefined);
-        }}
+        @input=${(event: InputEvent) => this.updateNumberConfig(key, this.eventValue(event))}
+        @change=${(event: Event) => this.updateNumberConfig(key, this.eventValue(event))}
+        @value-changed=${(event: CustomEvent) => this.updateNumberConfig(key, event.detail.value)}
       ></ha-textfield>
     `;
+  }
+
+  private eventValue(event: Event): string {
+    return String((event.currentTarget as HTMLInputElement).value ?? "");
+  }
+
+  private updateNumberConfig(key: ConfigKey, rawValue: unknown): void {
+    const value = Number.parseFloat(String(rawValue ?? "").replace(",", "."));
+    this.updateConfig(key, Number.isFinite(value) ? value : undefined);
   }
 
   private updateConfig(key: ConfigKey, value: unknown): void {

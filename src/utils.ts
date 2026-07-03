@@ -112,38 +112,84 @@ export function efficiency(config: DistrictHeatingCardConfig, deltaT: number | u
   const returnScore = clamp(((merged.max_return_temp - returnTemp) / (merged.max_return_temp - merged.good_return_temp || 1)) * 100);
   const score = deltaScore * 0.55 + returnScore * 0.45;
   const severity = severityFromScore(score, deltaT, returnTemp, merged.min_delta_t, merged.max_return_temp);
+  const message = efficiencyMessage(severity, deltaT, returnTemp, merged.min_delta_t, merged.good_delta_t, merged.max_return_temp, merged.good_return_temp);
 
   const copy = {
     excellent: {
       title: "Meget effektiv udnyttelse",
-      message: "Lav returtemperatur og god afkøling. Dit anlæg kører optimalt.",
     },
     good: {
       title: "God udnyttelse",
-      message: "Anlægget har en sund balance mellem afkøling og returtemperatur.",
     },
     warning: {
       title: "Kan optimeres",
-      message: "Hold øje med returtemperatur og afkøling. Justering kan forbedre udnyttelsen.",
     },
     critical: {
       title: "Lav effektivitet",
-      message: "Høj returtemperatur eller lav afkøling tyder på, at anlægget bør gennemgås.",
     },
     unknown: {
       title: "Mangler data",
-      message: "Tilføj flere sensorer for at vurdere driften.",
     },
-  } satisfies Record<Severity, Pick<EfficiencyResult, "title" | "message">>;
+  } satisfies Record<Severity, Pick<EfficiencyResult, "title">>;
 
   return {
     severity,
     ...copy[severity],
+    message,
     deltaLabel: deltaT >= merged.good_delta_t ? "Meget god" : deltaT >= merged.min_delta_t ? "God" : "Lav",
     returnLabel: returnTemp <= merged.good_return_temp ? "Meget god" : returnTemp <= merged.max_return_temp ? "God" : "Høj",
     deltaScore,
     returnScore,
   };
+}
+
+function efficiencyMessage(
+  severity: Severity,
+  deltaT: number,
+  returnTemp: number,
+  minDeltaT: number,
+  goodDeltaT: number,
+  maxReturnTemp: number,
+  goodReturnTemp: number,
+): string {
+  const lowDelta = deltaT < minDeltaT;
+  const highReturn = returnTemp > maxReturnTemp;
+  const notGoodDelta = deltaT < goodDeltaT;
+  const notGoodReturn = returnTemp > goodReturnTemp;
+
+  if (lowDelta && highReturn) {
+    return `Afkølingen er under ${minDeltaT.toFixed(1)} °C, og returtemperaturen er over ${maxReturnTemp.toFixed(1)} °C.`;
+  }
+
+  if (lowDelta) {
+    return `Afkølingen er under minimum på ${minDeltaT.toFixed(1)} °C. Returtemperaturen er acceptabel.`;
+  }
+
+  if (highReturn) {
+    return `Returtemperaturen er over maksimum på ${maxReturnTemp.toFixed(1)} °C. Afkølingen er acceptabel.`;
+  }
+
+  if (severity === "excellent") {
+    return `Afkølingen er over ${goodDeltaT.toFixed(1)} °C, og returtemperaturen er under ${goodReturnTemp.toFixed(1)} °C.`;
+  }
+
+  if (severity === "good") {
+    return "Afkøling og returtemperatur ligger i et sundt område.";
+  }
+
+  if (notGoodDelta && notGoodReturn) {
+    return `Afkøling og returtemperatur er acceptable, men ikke i det gode område endnu.`;
+  }
+
+  if (notGoodDelta) {
+    return `Afkølingen er acceptabel, men under målet på ${goodDeltaT.toFixed(1)} °C.`;
+  }
+
+  if (notGoodReturn) {
+    return `Returtemperaturen er acceptabel, men over målet på ${goodReturnTemp.toFixed(1)} °C.`;
+  }
+
+  return "Anlægget kører inden for de valgte grænser.";
 }
 
 export function flowColor(
