@@ -646,14 +646,11 @@ const translations = {
     editorGoodDeltaT: "God Delta T",
     editorMaxReturnTemp: "Maks returtemperatur",
     editorGoodReturnTemp: "God returtemperatur",
-    editorSupplyScale: "Fremløb farveskala",
-    editorReturnScale: "Returløb farveskala",
-    editorLightColorAt: "Lys farve ved °C",
-    editorDarkColorAt: "Mørk farve ved °C",
-    editorBlueColorAt: "Blå farve ved °C",
-    editorLightColor: "Lys farve",
-    editorDarkColor: "Mørk farve",
-    editorBlueColor: "Blå farve"
+    editorFlowColors: "Flowfarver",
+    editorSupplyLightColor: "Fremløb lys",
+    editorSupplyDarkColor: "Fremløb mørk",
+    editorReturnLightColor: "Returløb lys",
+    editorReturnBlueColor: "Returløb blå"
   },
   en: {
     supply: "Supply",
@@ -700,14 +697,11 @@ const translations = {
     editorGoodDeltaT: "Good Delta T",
     editorMaxReturnTemp: "Max return temperature",
     editorGoodReturnTemp: "Good return temperature",
-    editorSupplyScale: "Supply color scale",
-    editorReturnScale: "Return color scale",
-    editorLightColorAt: "Light color at °C",
-    editorDarkColorAt: "Dark color at °C",
-    editorBlueColorAt: "Blue color at °C",
-    editorLightColor: "Light color",
-    editorDarkColor: "Dark color",
-    editorBlueColor: "Blue color"
+    editorFlowColors: "Flow colors",
+    editorSupplyLightColor: "Supply light",
+    editorSupplyDarkColor: "Supply dark",
+    editorReturnLightColor: "Return light",
+    editorReturnBlueColor: "Return blue"
   }
 };
 function languageFromHass(hass) {
@@ -1011,12 +1005,16 @@ const cardStyles = i$3`
     cursor: default;
   }
 
-  .reading:not(:disabled):focus-visible,
-  .reading:not(:disabled):hover .value,
-  .stat-value:not(:disabled):focus-visible,
+  .reading:not(:disabled):hover,
   .stat-value:not(:disabled):hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    opacity: 0.86;
+  }
+
+  .reading:not(:disabled):focus-visible,
+  .stat-value:not(:disabled):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary-text-color, #fff) 42%, transparent);
+    outline-offset: 4px;
+    border-radius: 8px;
   }
 
   .reading.return {
@@ -1026,7 +1024,7 @@ const cardStyles = i$3`
   .label {
     color: var(--dhc-red);
     text-transform: uppercase;
-    font-size: clamp(12px, 2.8vw, 15px);
+    font-size: clamp(10px, 2.2vw, 12px);
     font-weight: 780;
     letter-spacing: 0.04em;
   }
@@ -1392,7 +1390,7 @@ const cardStyles = i$3`
   }
 
   .label {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .value {
@@ -1493,6 +1491,7 @@ const cardStyles = i$3`
     cursor: pointer;
     font-family: inherit;
     text-align: left;
+    text-decoration: none;
   }
 
   .stat-value:disabled {
@@ -1603,6 +1602,27 @@ const editorStyles = i$3`
     margin: 10px 0;
   }
 
+  .native-field {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0;
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .native-field input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.18));
+    border-radius: 8px;
+    background: var(--card-background-color, rgba(255, 255, 255, 0.04));
+    color: var(--primary-text-color);
+    font: inherit;
+  }
+
   ha-textfield,
   ha-entity-picker {
     display: block;
@@ -1661,17 +1681,11 @@ let DistrictHeatingCardEditor = class extends i {
       ${this.numberField(translate(language, "editorMaxReturnTemp"), "max_return_temp")}
       ${this.numberField(translate(language, "editorGoodReturnTemp"), "good_return_temp")}
 
-      <div class="section">${translate(language, "editorSupplyScale")}</div>
-      ${this.numberField(translate(language, "editorLightColorAt"), "supply_color_low_temp")}
-      ${this.textField(translate(language, "editorLightColor"), "supply_color_low")}
-      ${this.numberField(translate(language, "editorDarkColorAt"), "supply_color_high_temp")}
-      ${this.textField(translate(language, "editorDarkColor"), "supply_color_high")}
-
-      <div class="section">${translate(language, "editorReturnScale")}</div>
-      ${this.numberField(translate(language, "editorLightColorAt"), "return_color_low_temp")}
-      ${this.textField(translate(language, "editorLightColor"), "return_color_low")}
-      ${this.numberField(translate(language, "editorBlueColorAt"), "return_color_high_temp")}
-      ${this.textField(translate(language, "editorBlueColor"), "return_color_high")}
+      <div class="section">${translate(language, "editorFlowColors")}</div>
+      ${this.textField(translate(language, "editorSupplyLightColor"), "supply_color_low")}
+      ${this.textField(translate(language, "editorSupplyDarkColor"), "supply_color_high")}
+      ${this.textField(translate(language, "editorReturnLightColor"), "return_color_low")}
+      ${this.textField(translate(language, "editorReturnBlueColor"), "return_color_high")}
     `;
   }
   entityPicker(label, key, required = false) {
@@ -1694,7 +1708,7 @@ let DistrictHeatingCardEditor = class extends i {
       <label class="native-field">
         <span>${label}</span>
         <input
-          type="color"
+          type="text"
           .value=${String(((_a2 = this.config) == null ? void 0 : _a2[key]) ?? "#ffffff")}
           @input=${(event) => this.updateConfig(key, this.eventValue(event))}
           @change=${(event) => this.updateConfig(key, this.eventValue(event))}
@@ -1896,7 +1910,7 @@ let HaDistrictHeatingCard = class extends i {
               <circle cx="253" cy="88" r="2.2" />
               <circle cx="306" cy="101" r="2.8" />
             </g>
-            <polygon class="arrow supply-arrow" points="282,72 320,94 282,116" />
+            <polygon class="arrow supply-arrow" points="214,72 252,94 214,116" />
 
             <path class="wave return-wave wave-a" d="M410 89 C434 76 454 112 478 98 S522 76 546 94 S590 111 614 93 S658 77 680 95 S704 105 724 92" />
             <path class="wave return-wave wave-b" d="M410 101 C434 112 454 78 478 91 S522 112 546 92 S590 78 614 95 S658 111 724 92" />

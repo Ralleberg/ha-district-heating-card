@@ -49,17 +49,11 @@ export class DistrictHeatingCardEditor extends LitElement {
       ${this.numberField(translate(language, "editorMaxReturnTemp"), "max_return_temp")}
       ${this.numberField(translate(language, "editorGoodReturnTemp"), "good_return_temp")}
 
-      <div class="section">${translate(language, "editorSupplyScale")}</div>
-      ${this.numberField(translate(language, "editorLightColorAt"), "supply_color_low_temp")}
-      ${this.textField(translate(language, "editorLightColor"), "supply_color_low")}
-      ${this.numberField(translate(language, "editorDarkColorAt"), "supply_color_high_temp")}
-      ${this.textField(translate(language, "editorDarkColor"), "supply_color_high")}
-
-      <div class="section">${translate(language, "editorReturnScale")}</div>
-      ${this.numberField(translate(language, "editorLightColorAt"), "return_color_low_temp")}
-      ${this.textField(translate(language, "editorLightColor"), "return_color_low")}
-      ${this.numberField(translate(language, "editorBlueColorAt"), "return_color_high_temp")}
-      ${this.textField(translate(language, "editorBlueColor"), "return_color_high")}
+      <div class="section">${translate(language, "editorFlowColors")}</div>
+      ${this.textField(translate(language, "editorSupplyLightColor"), "supply_color_low")}
+      ${this.textField(translate(language, "editorSupplyDarkColor"), "supply_color_high")}
+      ${this.textField(translate(language, "editorReturnLightColor"), "return_color_low")}
+      ${this.textField(translate(language, "editorReturnBlueColor"), "return_color_high")}
     `;
   }
 
@@ -82,7 +76,7 @@ export class DistrictHeatingCardEditor extends LitElement {
       <label class="native-field">
         <span>${label}</span>
         <input
-          type="color"
+          type="text"
           .value=${String(this.config?.[key] ?? "#ffffff")}
           @input=${(event: InputEvent) => this.updateConfig(key, this.eventValue(event))}
           @change=${(event: Event) => this.updateConfig(key, this.eventValue(event))}

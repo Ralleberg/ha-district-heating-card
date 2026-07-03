@@ -90,12 +90,16 @@ export const cardStyles = css`
     cursor: default;
   }
 
-  .reading:not(:disabled):focus-visible,
-  .reading:not(:disabled):hover .value,
-  .stat-value:not(:disabled):focus-visible,
+  .reading:not(:disabled):hover,
   .stat-value:not(:disabled):hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    opacity: 0.86;
+  }
+
+  .reading:not(:disabled):focus-visible,
+  .stat-value:not(:disabled):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary-text-color, #fff) 42%, transparent);
+    outline-offset: 4px;
+    border-radius: 8px;
   }
 
   .reading.return {
@@ -105,7 +109,7 @@ export const cardStyles = css`
   .label {
     color: var(--dhc-red);
     text-transform: uppercase;
-    font-size: clamp(12px, 2.8vw, 15px);
+    font-size: clamp(10px, 2.2vw, 12px);
     font-weight: 780;
     letter-spacing: 0.04em;
   }
@@ -471,7 +475,7 @@ export const cardStyles = css`
   }
 
   .label {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .value {
@@ -572,6 +576,7 @@ export const cardStyles = css`
     cursor: pointer;
     font-family: inherit;
     text-align: left;
+    text-decoration: none;
   }
 
   .stat-value:disabled {
@@ -681,6 +686,27 @@ export const editorStyles = css`
   .field {
     display: block;
     margin: 10px 0;
+  }
+
+  .native-field {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0;
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .native-field input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--divider-color, rgba(255, 255, 255, 0.18));
+    border-radius: 8px;
+    background: var(--card-background-color, rgba(255, 255, 255, 0.04));
+    color: var(--primary-text-color);
+    font: inherit;
   }
 
   ha-textfield,

@@ -148,7 +148,7 @@ export class HaDistrictHeatingCard extends LitElement {
               <circle cx="253" cy="88" r="2.2" />
               <circle cx="306" cy="101" r="2.8" />
             </g>
-            <polygon class="arrow supply-arrow" points="282,72 320,94 282,116" />
+            <polygon class="arrow supply-arrow" points="214,72 252,94 214,116" />
 
             <path class="wave return-wave wave-a" d="M410 89 C434 76 454 112 478 98 S522 76 546 94 S590 111 614 93 S658 77 680 95 S704 105 724 92" />
             <path class="wave return-wave wave-b" d="M410 101 C434 112 454 78 478 91 S522 112 546 92 S590 78 614 95 S658 111 724 92" />
