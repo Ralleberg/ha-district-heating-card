@@ -1,11 +1,13 @@
-import { LitElement, html, svg } from "lit";
+import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import "./editor";
 import { icons } from "./icons";
 import { cardStyles } from "./styles";
 import {
+  alphaHex,
   computeDeltaT,
   efficiency,
+  flowColor,
   formatValue,
   mergeConfig,
   numericState,
@@ -42,7 +44,7 @@ export class HaDistrictHeatingCard extends LitElement {
   }
 
   public getCardSize(): number {
-    return 6;
+    return 4;
   }
 
   protected override render() {
@@ -53,15 +55,36 @@ export class HaDistrictHeatingCard extends LitElement {
     const supply = numericState(this.hass, this.config.supply_temp_entity);
     const returned = numericState(this.hass, this.config.return_temp_entity);
     const deltaT = computeDeltaT(this.hass, this.config);
-    const result = efficiency(this.config, deltaT, returned);
+    const averageDeltaT = numericState(this.hass, this.config.average_delta_t_entity);
+    const indoorTemp = numericState(this.hass, this.config.indoor_temp_entity);
+    const outdoorTemp = numericState(this.hass, this.config.outdoor_temp_entity);
+    const assessmentConfig = this.adjustAssessmentForHeatDemand(this.config, indoorTemp, outdoorTemp);
+    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned);
     const severityClass = `severity-${result.severity}`;
+    const supplyColor = flowColor(
+      supply,
+      this.config.supply_color_low_temp ?? 50,
+      this.config.supply_color_high_temp ?? 75,
+      this.config.supply_color_low ?? "#f28aa0",
+      this.config.supply_color_high ?? "#8f2438",
+    );
+    const returnColor = flowColor(
+      returned,
+      this.config.return_color_low_temp ?? 0,
+      this.config.return_color_high_temp ?? 35,
+      this.config.return_color_low ?? "#f4f7fb",
+      this.config.return_color_high ?? "#3f6ed6",
+    );
+    const style = [
+      `--supply-color: ${supplyColor}`,
+      `--supply-bg: ${alphaHex(supplyColor, 0.68)}`,
+      `--return-color: ${returnColor}`,
+      `--return-bg: ${alphaHex(returnColor, 0.68)}`,
+      `--severity-color: ${this.severityColor(result.severity)}`,
+    ].join(";");
 
     return html`
-      <ha-card>
-        <div class="header">
-          <h2>${this.config.name ?? "Fjernvarme"}</h2>
-        </div>
-
+      <ha-card style=${style}>
         <section class="flow" aria-label="Fjernvarme flow">
           <div class="flow-readings">
             ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")))}
@@ -70,19 +93,8 @@ export class HaDistrictHeatingCard extends LitElement {
           ${this.renderPlant()}
         </section>
 
-        <section class="metrics">
-          <div class="panel metric delta" style=${`--severity-color: ${this.severityColor(result.severity)}`}>
-            <div class="metric-label">Temperaturforskel (&Delta;T)</div>
-            <div class="delta-value">${formatValue(deltaT, "°C")}</div>
-            <div class="delta-status">${icons.leaf}<span>${result.deltaLabel === "Ukendt" ? "Mangler data" : "God udnyttelse"}</span></div>
-          </div>
-
-          ${this.config.power_entity ? this.renderMetric("Effekt", "power_entity", "kW", icons.flame, this.renderSparkline()) : null}
-          ${this.config.energy_today_entity ? this.renderMetric("Energi i dag", "energy_today_entity", "kWh", icons.drop, this.renderBars()) : null}
-        </section>
-
-        ${this.config.show_secondary === false ? null : this.renderSecondary(deltaT)}
-        ${this.config.show_diagnostics === false ? null : this.renderDiagnostics(result, returned, deltaT, severityClass)}
+        ${this.renderDiagnostics(result, deltaT, severityClass)}
+        ${this.renderStats()}
       </ha-card>
     `;
   }
@@ -102,14 +114,14 @@ export class HaDistrictHeatingCard extends LitElement {
         <svg viewBox="0 0 760 210" role="img" aria-label="Fjernvarmerør gennem huset">
           <defs>
             <linearGradient id="hotGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#612f3f" />
-              <stop offset="52%" stop-color="#d75f76" />
-              <stop offset="100%" stop-color="#783446" />
+              <stop offset="0%" stop-color="var(--supply-bg)" />
+              <stop offset="52%" stop-color="var(--supply-color)" />
+              <stop offset="100%" stop-color="var(--supply-bg)" />
             </linearGradient>
             <linearGradient id="coldGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#263c73" />
-              <stop offset="50%" stop-color="#4d83d8" />
-              <stop offset="100%" stop-color="#203965" />
+              <stop offset="0%" stop-color="var(--return-bg)" />
+              <stop offset="50%" stop-color="var(--return-color)" />
+              <stop offset="100%" stop-color="var(--return-bg)" />
             </linearGradient>
           </defs>
 
@@ -150,111 +162,80 @@ export class HaDistrictHeatingCard extends LitElement {
     `;
   }
 
-  private renderMetric(
-    label: string,
-    key: keyof DistrictHeatingCardConfig,
-    fallbackUnit: string,
-    icon: unknown,
-    visual: unknown,
-  ) {
+  private renderStat(label: string, key: keyof DistrictHeatingCardConfig, fallbackUnit: string, icon: unknown) {
     const entityId = this.config?.[key];
     const value = typeof entityId === "string" ? numericState(this.hass, entityId) : undefined;
     const labelUnit = typeof entityId === "string" ? unit(this.hass, entityId, fallbackUnit) : fallbackUnit;
 
     return html`
-      <div class="panel metric">
-        <div class="metric-label">${label}</div>
-        <div class="metric-value">
-          <span class="metric-icon">${icon}</span>
-          <span>${formatValue(value, labelUnit)}</span>
-        </div>
-        ${visual}
+      <div class="stat">
+        <span class="stat-icon">${icon}</span>
+        <span class="stat-text">
+          <span class="stat-label">${label}</span>
+          <span class="stat-value">${formatValue(value, labelUnit)}</span>
+        </span>
       </div>
     `;
   }
 
-  private renderSecondary(deltaT: number | undefined) {
+  private renderStats() {
+    const stats = [
+      this.config?.power_entity ? this.renderStat("Effekt", "power_entity", "kW", icons.flame) : null,
+      this.config?.energy_today_entity ? this.renderStat("I dag", "energy_today_entity", "kWh", icons.drop) : null,
+      this.config?.yearly_energy_entity ? this.renderStat("I år", "yearly_energy_entity", "MWh", icons.chart) : null,
+    ].filter(Boolean);
+
+    if (stats.length === 0) {
+      return null;
+    }
+
     return html`
-      <section class="panel secondary">
-        ${this.config?.outdoor_temp_entity ? this.renderMini("Udetemperatur", "outdoor_temp_entity", "°C", icons.sun) : null}
-        ${this.config?.indoor_temp_entity ? this.renderMini("Indetemperatur", "indoor_temp_entity", "°C", icons.home) : null}
-        ${this.config?.yearly_energy_entity ? this.renderMini("Forbrug i år", "yearly_energy_entity", "MWh", icons.chart) : null}
-        ${this.config?.average_delta_t_entity
-          ? this.renderMini("Gennemsnitlig ΔT", "average_delta_t_entity", "°C", icons.gauge)
-          : this.renderMiniValue("Aktuel ΔT", formatValue(deltaT, "°C"), icons.gauge)}
-      </section>
+      <section class="stats">${stats}</section>
     `;
   }
 
-  private renderMini(label: string, key: keyof DistrictHeatingCardConfig, fallbackUnit: string, icon: unknown) {
-    const entityId = this.config?.[key];
-    const value = typeof entityId === "string" ? numericState(this.hass, entityId) : undefined;
-    const labelUnit = typeof entityId === "string" ? unit(this.hass, entityId, fallbackUnit) : fallbackUnit;
-    return this.renderMiniValue(label, formatValue(value, labelUnit), icon);
-  }
-
-  private renderMiniValue(label: unknown, value: string, icon: unknown) {
-    return html`
-      <div class="mini">
-        <span class="mini-icon">${icon}</span>
-        <div>
-          <div class="mini-label">${label}</div>
-          <div class="mini-value">${value}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  private renderDiagnostics(result: ReturnType<typeof efficiency>, returnTemp: number | undefined, deltaT: number | undefined, severityClass: string) {
+  private renderDiagnostics(result: ReturnType<typeof efficiency>, deltaT: number | undefined, severityClass: string) {
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
     return html`
-      <section class=${`panel diagnostics ${severityClass}`}>
+      <section class=${`diagnostics ${severityClass}`}>
         <div class="summary">
           <span class="status-icon">${statusIcon}</span>
           <div>
             <div class="summary-title">${result.title}</div>
-            <div class="summary-text">${result.message}</div>
+            <div class="summary-text">${formatValue(deltaT, "°C")} afkøling · ${result.message}</div>
           </div>
         </div>
-
-        ${this.renderDiagnostic("Returtemperatur", formatValue(returnTemp, "°C"), result.returnLabel, result.returnScore, icons.drop)}
-        ${this.renderDiagnostic("Afkøling (&Delta;T)", formatValue(deltaT, "°C"), result.deltaLabel, result.deltaScore, icons.flame)}
       </section>
     `;
   }
 
-  private renderDiagnostic(label: string, value: string, sub: string, score: number, icon: unknown) {
-    return html`
-      <div class="diagnostic">
-        <div class="diagnostic-head">
-          <span class="diagnostic-icon">${icon}</span>
-          <span class="diagnostic-label">${label}</span>
-        </div>
-        <div class="diagnostic-value">${value}</div>
-        <div class="diagnostic-sub">${sub}</div>
-        <div class="bar" style=${`--score: ${Math.round(score)}%`}></div>
-      </div>
-    `;
-  }
+  private adjustAssessmentForHeatDemand(
+    config: DistrictHeatingCardConfig,
+    indoorTemp: number | undefined,
+    outdoorTemp: number | undefined,
+  ): DistrictHeatingCardConfig {
+    if (indoorTemp === undefined || outdoorTemp === undefined) {
+      return config;
+    }
 
-  private renderSparkline() {
-    return svg`
-      <svg class="sparkline" viewBox="0 0 220 54" aria-hidden="true">
-        <path d="M4 44 22 34 39 39 57 27 75 25 93 36 110 29 128 31 146 18 164 24 182 30 200 21 216 15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M4 44 22 34 39 39 57 27 75 25 93 36 110 29 128 31 146 18 164 24 182 30 200 21 216 15V54H4Z" fill="currentColor" opacity="0.18" />
-      </svg>
-    `;
-  }
+    const heatDemand = indoorTemp - outdoorTemp;
+    if (heatDemand < 8) {
+      return {
+        ...config,
+        min_delta_t: (config.min_delta_t ?? 20) * 0.8,
+        good_delta_t: (config.good_delta_t ?? 30) * 0.85,
+      };
+    }
 
-  private renderBars() {
-    return svg`
-      <svg class="bars" viewBox="0 0 220 54" aria-hidden="true">
-        ${[14, 31, 47, 25, 40, 17, 21, 35, 18, 29, 42, 24].map((height, index) => {
-          const x = 8 + index * 17;
-          return svg`<rect x=${x} y=${52 - height} width="9" height=${height} rx="3" fill="currentColor" opacity=${index % 3 === 0 ? "0.55" : "0.9"} />`;
-        })}
-      </svg>
-    `;
+    if (heatDemand > 22) {
+      return {
+        ...config,
+        max_return_temp: (config.max_return_temp ?? 45) - 3,
+        good_return_temp: (config.good_return_temp ?? 35) - 2,
+      };
+    }
+
+    return config;
   }
 
   private severityColor(severity: string): string {

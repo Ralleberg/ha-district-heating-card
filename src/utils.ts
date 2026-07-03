@@ -7,13 +7,35 @@ export const DEFAULT_CONFIG = {
   good_delta_t: 30,
   max_return_temp: 45,
   good_return_temp: 35,
+  supply_color_low_temp: 50,
+  supply_color_high_temp: 75,
+  supply_color_low: "#f28aa0",
+  supply_color_high: "#8f2438",
+  return_color_low_temp: 0,
+  return_color_high_temp: 35,
+  return_color_low: "#f4f7fb",
+  return_color_high: "#3f6ed6",
   show_status: true,
   show_secondary: true,
   show_diagnostics: true,
 } satisfies Partial<DistrictHeatingCardConfig>;
 
 export function mergeConfig(config: DistrictHeatingCardConfig): Required<Pick<DistrictHeatingCardConfig,
-  "min_delta_t" | "good_delta_t" | "max_return_temp" | "good_return_temp" | "show_status" | "show_secondary" | "show_diagnostics"
+  | "min_delta_t"
+  | "good_delta_t"
+  | "max_return_temp"
+  | "good_return_temp"
+  | "supply_color_low_temp"
+  | "supply_color_high_temp"
+  | "supply_color_low"
+  | "supply_color_high"
+  | "return_color_low_temp"
+  | "return_color_high_temp"
+  | "return_color_low"
+  | "return_color_high"
+  | "show_status"
+  | "show_secondary"
+  | "show_diagnostics"
 >> & DistrictHeatingCardConfig {
   return {
     ...DEFAULT_CONFIG,
@@ -122,6 +144,64 @@ export function efficiency(config: DistrictHeatingCardConfig, deltaT: number | u
     deltaScore,
     returnScore,
   };
+}
+
+export function flowColor(
+  value: number | undefined,
+  lowTemp: number,
+  highTemp: number,
+  lowColor: string,
+  highColor: string,
+): string {
+  if (value === undefined) {
+    return lowColor;
+  }
+
+  const ratio = clamp((value - lowTemp) / (highTemp - lowTemp || 1), 0, 1);
+  return mixHex(lowColor, highColor, ratio);
+}
+
+export function alphaHex(color: string, alpha: number): string {
+  const rgb = parseHex(color);
+  if (!rgb) {
+    return color;
+  }
+
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamp(alpha, 0, 1)})`;
+}
+
+function mixHex(left: string, right: string, ratio: number): string {
+  const from = parseHex(left);
+  const to = parseHex(right);
+  if (!from || !to) {
+    return ratio < 0.5 ? left : right;
+  }
+
+  const r = Math.round(from.r + (to.r - from.r) * ratio);
+  const g = Math.round(from.g + (to.g - from.g) * ratio);
+  const b = Math.round(from.b + (to.b - from.b) * ratio);
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function parseHex(color: string): { r: number; g: number; b: number } | undefined {
+  const normalized = color.trim().replace("#", "");
+  const expanded = normalized.length === 3
+    ? normalized.split("").map((part) => `${part}${part}`).join("")
+    : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) {
+    return undefined;
+  }
+
+  return {
+    r: Number.parseInt(expanded.slice(0, 2), 16),
+    g: Number.parseInt(expanded.slice(2, 4), 16),
+    b: Number.parseInt(expanded.slice(4, 6), 16),
+  };
+}
+
+function toHex(value: number): string {
+  return value.toString(16).padStart(2, "0");
 }
 
 function severityFromScore(score: number, deltaT: number, returnTemp: number, minDeltaT: number, maxReturnTemp: number): Severity {

@@ -27,6 +27,14 @@ export interface DistrictHeatingCardConfig {
   good_delta_t?: number;
   max_return_temp?: number;
   good_return_temp?: number;
+  supply_color_low_temp?: number;
+  supply_color_high_temp?: number;
+  supply_color_low?: string;
+  supply_color_high?: string;
+  return_color_low_temp?: number;
+  return_color_high_temp?: number;
+  return_color_low?: string;
+  return_color_high?: string;
   show_status?: boolean;
   show_secondary?: boolean;
   show_diagnostics?: boolean;

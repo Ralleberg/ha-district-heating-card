@@ -26,17 +26,17 @@ export class DistrictHeatingCardEditor extends LitElement {
     }
 
     return html`
-      ${this.textField("Titel", "name")}
-
       <div class="section">Temperaturer</div>
       ${this.entityPicker("Fremløbstemperatur", "supply_temp_entity", true)}
       ${this.entityPicker("Returtemperatur", "return_temp_entity", true)}
       ${this.entityPicker("Delta T", "delta_t_entity")}
 
-      <div class="section">Valgfrie målinger</div>
+      <div class="section">Valgfrie driftstal</div>
       ${this.entityPicker("Effekt", "power_entity")}
       ${this.entityPicker("Energi i dag", "energy_today_entity")}
       ${this.entityPicker("Forbrug i år", "yearly_energy_entity")}
+
+      <div class="section">Input til vurdering</div>
       ${this.entityPicker("Udetemperatur", "outdoor_temp_entity")}
       ${this.entityPicker("Indetemperatur", "indoor_temp_entity")}
       ${this.entityPicker("Gennemsnitlig Delta T", "average_delta_t_entity")}
@@ -47,10 +47,17 @@ export class DistrictHeatingCardEditor extends LitElement {
       ${this.numberField("Maks returtemperatur", "max_return_temp")}
       ${this.numberField("God returtemperatur", "good_return_temp")}
 
-      <div class="section">Visning</div>
-      ${this.toggle("Vis driftsstatus", "show_status")}
-      ${this.toggle("Vis ekstra målinger", "show_secondary")}
-      ${this.toggle("Vis effektivitetspanel", "show_diagnostics")}
+      <div class="section">Fremløb farveskala</div>
+      ${this.numberField("Lys farve ved °C", "supply_color_low_temp")}
+      ${this.textField("Lys farve", "supply_color_low")}
+      ${this.numberField("Mørk farve ved °C", "supply_color_high_temp")}
+      ${this.textField("Mørk farve", "supply_color_high")}
+
+      <div class="section">Returløb farveskala</div>
+      ${this.numberField("Lys farve ved °C", "return_color_low_temp")}
+      ${this.textField("Lys farve", "return_color_low")}
+      ${this.numberField("Blå farve ved °C", "return_color_high_temp")}
+      ${this.textField("Blå farve", "return_color_high")}
     `;
   }
 
@@ -91,18 +98,6 @@ export class DistrictHeatingCardEditor extends LitElement {
           this.updateConfig(key, Number.isFinite(value) ? value : undefined);
         }}
       ></ha-textfield>
-    `;
-  }
-
-  private toggle(label: string, key: ConfigKey) {
-    return html`
-      <div class="toggle">
-        <span>${label}</span>
-        <ha-switch
-          .checked=${this.config?.[key] !== false}
-          @change=${(event: Event) => this.updateConfig(key, (event.currentTarget as HTMLInputElement).checked)}
-        ></ha-switch>
-      </div>
     `;
   }
 

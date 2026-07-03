@@ -54,6 +54,14 @@ min_delta_t: 20
 good_delta_t: 30
 max_return_temp: 45
 good_return_temp: 35
+supply_color_low_temp: 50
+supply_color_high_temp: 75
+supply_color_low: "#f28aa0"
+supply_color_high: "#8f2438"
+return_color_low_temp: 0
+return_color_high_temp: 35
+return_color_low: "#f4f7fb"
+return_color_high: "#3f6ed6"
 ```
 
 If `delta_t_entity` is omitted, the card calculates Delta T as:
@@ -81,9 +89,14 @@ supply_temp_entity - return_temp_entity
 | `good_delta_t` | No | `30` | Delta T considered good |
 | `max_return_temp` | No | `45` | Highest acceptable return temperature |
 | `good_return_temp` | No | `35` | Return temperature considered good |
-| `show_status` | No | `true` | Show current operation indicator |
-| `show_secondary` | No | `true` | Show optional lower metric row |
-| `show_diagnostics` | No | `true` | Show efficiency diagnostics |
+| `supply_color_low_temp` | No | `50` | Temperature for the light supply flow color |
+| `supply_color_high_temp` | No | `75` | Temperature for the dark supply flow color |
+| `supply_color_low` | No | `#f28aa0` | Light supply flow color |
+| `supply_color_high` | No | `#8f2438` | Dark supply flow color |
+| `return_color_low_temp` | No | `0` | Temperature for the light return flow color |
+| `return_color_high_temp` | No | `35` | Temperature for the blue return flow color |
+| `return_color_low` | No | `#f4f7fb` | Light return flow color |
+| `return_color_high` | No | `#3f6ed6` | Blue return flow color |
 
 ## Development
 

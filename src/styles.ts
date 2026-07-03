@@ -421,6 +421,106 @@ export const cardStyles = css`
     background: rgba(255, 255, 255, 0.65);
   }
 
+  .flow-readings {
+    align-items: start;
+  }
+
+  .reading {
+    min-width: 0;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .value {
+    font-size: clamp(24px, 7.8vw, 36px);
+  }
+
+  .diagnostics {
+    display: block;
+    margin-top: 14px;
+    padding: 15px 16px;
+    border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
+    border-radius: 24px;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 0;
+  }
+
+  .status-icon {
+    width: 38px;
+    height: 38px;
+    border-width: 2px;
+  }
+
+  .summary-title {
+    font-size: clamp(17px, 4.8vw, 21px);
+  }
+
+  .summary-text {
+    margin-top: 4px;
+    font-size: clamp(12px, 3.4vw, 14px);
+    line-height: 1.32;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .stat {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid var(--dhc-border);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .stat-icon {
+    width: 22px;
+    height: 22px;
+    color: color-mix(in srgb, var(--dhc-muted) 86%, white);
+  }
+
+  .stat-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .stat-text {
+    display: grid;
+    min-width: 0;
+  }
+
+  .stat-label {
+    color: var(--dhc-muted);
+    font-size: 10px;
+    font-weight: 760;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    margin-top: 2px;
+    font-size: 15px;
+    font-weight: 740;
+    white-space: nowrap;
+  }
+
   @keyframes drift {
     from {
       stroke-dashoffset: 0;
@@ -468,7 +568,6 @@ export const cardStyles = css`
       min-height: 116px;
     }
 
-    .metrics,
     .diagnostics {
       grid-template-columns: 1fr;
     }
