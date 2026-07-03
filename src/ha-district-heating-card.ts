@@ -7,7 +7,6 @@ import {
   computeDeltaT,
   efficiency,
   formatValue,
-  lastUpdated,
   mergeConfig,
   numericState,
   unit,
@@ -56,25 +55,19 @@ export class HaDistrictHeatingCard extends LitElement {
     const deltaT = computeDeltaT(this.hass, this.config);
     const result = efficiency(this.config, deltaT, returned);
     const severityClass = `severity-${result.severity}`;
-    const updated = lastUpdated(this.hass, this.config);
 
     return html`
       <ha-card>
         <div class="header">
-          <div class="title">
-            <span class="title-icon">${icons.flame}</span>
-            <div>
-              <h2>${this.config.name ?? "Fjernvarme"}</h2>
-              ${this.config.show_status !== false ? html`<div class="mode">Aktuel drift</div>` : null}
-            </div>
-          </div>
-          ${updated ? html`<div class="updated">${icons.clock}<span>Opdateret ${updated}</span></div>` : null}
+          <h2>${this.config.name ?? "Fjernvarme"}</h2>
         </div>
 
         <section class="flow" aria-label="Fjernvarme flow">
-          ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), "Fra fjernvarmen")}
+          <div class="flow-readings">
+            ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")))}
+            ${this.renderReading("Returløb", formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), true)}
+          </div>
           ${this.renderPlant()}
-          ${this.renderReading("Returløb", formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), "Til fjernvarmen", true)}
         </section>
 
         <section class="metrics">
@@ -94,12 +87,11 @@ export class HaDistrictHeatingCard extends LitElement {
     `;
   }
 
-  private renderReading(label: string, value: string, caption: string, isReturn = false) {
+  private renderReading(label: string, value: string, isReturn = false) {
     return html`
       <div class=${`reading ${isReturn ? "return" : ""}`}>
         <div class="label">${label}</div>
         <div class="value">${value}</div>
-        <div class="caption">${caption}</div>
       </div>
     `;
   }
@@ -107,49 +99,51 @@ export class HaDistrictHeatingCard extends LitElement {
   private renderPlant() {
     return html`
       <div class="plant">
-        <svg viewBox="0 0 760 250" role="img" aria-label="Fjernvarmerør gennem huset">
+        <svg viewBox="0 0 760 210" role="img" aria-label="Fjernvarmerør gennem huset">
           <defs>
             <linearGradient id="hotGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#b53129" />
-              <stop offset="44%" stop-color="#ff725f" />
-              <stop offset="100%" stop-color="#8f2c2c" />
+              <stop offset="0%" stop-color="#612f3f" />
+              <stop offset="52%" stop-color="#d75f76" />
+              <stop offset="100%" stop-color="#783446" />
             </linearGradient>
             <linearGradient id="coldGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#143d84" />
-              <stop offset="50%" stop-color="#55a5ff" />
-              <stop offset="100%" stop-color="#1a55b7" />
+              <stop offset="0%" stop-color="#263c73" />
+              <stop offset="50%" stop-color="#4d83d8" />
+              <stop offset="100%" stop-color="#203965" />
             </linearGradient>
           </defs>
 
-          <line class="pipe-base pipe-hot" x1="22" y1="108" x2="276" y2="108" />
-          <line class="pipe-base pipe-cold" x1="484" y1="108" x2="738" y2="108" />
+          <line class="pipe-base pipe-hot" x1="22" y1="64" x2="738" y2="64" />
+          <line class="pipe-base pipe-cold" x1="22" y1="147" x2="738" y2="147" />
 
-          <path class="house" d="M334 92V54l-35 1c-10 0-14-13-6-19L380 7a20 20 0 0 1 24 0l87 29c8 6 4 19-6 19h-35v118c0 11-9 20-20 20h-76c-11 0-20-9-20-20V92Z" />
+          <g class="house-group">
+            <path class="house" d="M331 90V54h-32c-9 0-13-12-6-17l88-31a20 20 0 0 1 22 0l88 31c7 5 3 17-6 17h-32v103c0 11-9 20-20 20h-82c-11 0-20-9-20-20V90Z" />
 
-          <g class="radiator" fill="currentColor" opacity="0.84">
-            <rect x="351" y="118" width="16" height="66" rx="8" />
-            <rect x="381" y="118" width="16" height="66" rx="8" />
-            <rect x="411" y="118" width="16" height="66" rx="8" />
-            <rect x="441" y="122" width="9" height="58" rx="5" />
-            <rect x="345" y="136" width="112" height="10" rx="5" />
-          </g>
+            <g class="radiator" fill="currentColor" opacity="0.84">
+              <rect x="350" y="110" width="13" height="55" rx="7" />
+              <rect x="375" y="110" width="13" height="55" rx="7" />
+              <rect x="400" y="110" width="13" height="55" rx="7" />
+              <rect x="425" y="114" width="8" height="47" rx="4" />
+              <rect x="344" y="126" width="96" height="8" rx="4" />
+            </g>
 
-          <g class="heat-wave" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.86">
-            <path d="M371 87c-14-17 14-22 0-39" />
-            <path d="M399 87c-14-17 14-22 0-39" />
-            <path d="M427 87c-14-17 14-22 0-39" />
+            <g class="heat-wave" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity="0.86">
+              <path d="M365 91c-13-16 13-21 0-37" />
+              <path d="M392 91c-13-16 13-21 0-37" />
+              <path d="M419 91c-13-16 13-21 0-37" />
+            </g>
           </g>
 
           <g opacity="0.9">
-            <line class="pipe-line" x1="36" y1="88" x2="106" y2="88" stroke-dasharray="46 44" />
-            <line class="pipe-line" x1="124" y1="113" x2="228" y2="113" stroke-dasharray="72 55" />
-            <line class="spark" x1="52" y1="131" x2="264" y2="131" />
-            <polygon class="arrow" points="221,91 259,108 221,125" />
+            <line class="pipe-line hot-line" x1="52" y1="45" x2="728" y2="45" stroke-dasharray="42 48" />
+            <line class="pipe-line hot-line" x1="30" y1="76" x2="704" y2="76" stroke-dasharray="12 34 52 42" />
+            <line class="spark hot-line" x1="44" y1="64" x2="716" y2="64" />
+            <polygon class="arrow supply-arrow" points="632,42 671,64 632,86" />
 
-            <line class="pipe-line" x1="504" y1="88" x2="586" y2="88" stroke-dasharray="46 44" />
-            <line class="pipe-line" x1="604" y1="113" x2="714" y2="113" stroke-dasharray="72 55" />
-            <line class="spark" x1="500" y1="131" x2="724" y2="131" />
-            <polygon class="arrow" points="674,91 712,108 674,125" />
+            <line class="pipe-line cold-line" x1="32" y1="128" x2="710" y2="128" stroke-dasharray="42 48" />
+            <line class="pipe-line cold-line" x1="54" y1="159" x2="730" y2="159" stroke-dasharray="12 34 52 42" />
+            <line class="spark cold-line" x1="44" y1="147" x2="716" y2="147" />
+            <polygon class="arrow return-arrow" points="128,125 89,147 128,169" />
           </g>
         </svg>
       </div>

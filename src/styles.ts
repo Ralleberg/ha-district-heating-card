@@ -4,29 +4,29 @@ export const cardStyles = css`
   :host {
     display: block;
     color: var(--primary-text-color, #f4f7fb);
-    --dhc-card-bg: color-mix(in srgb, var(--card-background-color, #101827) 82%, transparent);
-    --dhc-panel-bg: color-mix(in srgb, var(--card-background-color, #101827) 74%, transparent);
+    --dhc-card-bg: color-mix(in srgb, var(--card-background-color, #171925) 82%, transparent);
+    --dhc-panel-bg: color-mix(in srgb, var(--card-background-color, #171925) 68%, transparent);
     --dhc-border: color-mix(in srgb, var(--divider-color, #738099) 40%, transparent);
     --dhc-muted: var(--secondary-text-color, #aeb7c8);
-    --dhc-red: var(--error-color, #ff665c);
-    --dhc-red-soft: #ff8d6f;
-    --dhc-blue: var(--info-color, #4f91ff);
+    --dhc-red: #ef6f8e;
+    --dhc-red-soft: #f27c98;
+    --dhc-blue: #6d8ed6;
     --dhc-green: var(--success-color, #54c76d);
     --dhc-yellow: var(--warning-color, #f4bf45);
     --dhc-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
-    --dhc-radius: var(--ha-card-border-radius, 28px);
+    --dhc-radius: var(--ha-card-border-radius, 30px);
     font-family: var(--primary-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   }
 
   ha-card {
     position: relative;
     overflow: hidden;
-    padding: clamp(18px, 2.8vw, 32px);
+    padding: clamp(20px, 3vw, 30px);
     border-radius: var(--dhc-radius);
     border: 1px solid var(--dhc-border);
     background:
-      radial-gradient(circle at 16% 14%, rgba(255, 103, 91, 0.16), transparent 30%),
-      radial-gradient(circle at 86% 24%, rgba(61, 135, 255, 0.2), transparent 32%),
+      radial-gradient(circle at 18% 22%, rgba(239, 111, 142, 0.14), transparent 36%),
+      radial-gradient(circle at 88% 28%, rgba(109, 142, 214, 0.18), transparent 38%),
       linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 32%),
       var(--dhc-card-bg);
     box-shadow: var(--dhc-shadow);
@@ -34,6 +34,7 @@ export const cardStyles = css`
   }
 
   .header,
+  .flow,
   .metrics,
   .secondary,
   .diagnostics {
@@ -42,34 +43,13 @@ export const cardStyles = css`
   }
 
   .header {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: start;
+    display: block;
   }
 
-  .title {
-    display: flex;
-    gap: 13px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .title-icon,
-  .status-icon {
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    color: var(--dhc-red-soft);
-  }
-
-  .title-icon svg,
   .status-icon svg,
   .metric-icon svg,
   .mini-icon svg,
-  .diagnostic-icon svg,
-  .updated svg {
+  .diagnostic-icon svg {
     width: 100%;
     height: 100%;
     fill: currentColor;
@@ -77,55 +57,21 @@ export const cardStyles = css`
 
   h2 {
     margin: 0;
-    font-size: clamp(28px, 4vw, 44px);
+    font-size: clamp(28px, 7vw, 42px);
     line-height: 1;
-    font-weight: 720;
+    font-weight: 760;
     letter-spacing: 0;
   }
 
-  .mode {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-top: 10px;
-    color: var(--dhc-muted);
-    font-size: clamp(15px, 2vw, 20px);
-  }
-
-  .mode::before {
-    content: "";
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--dhc-green);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--dhc-green) 70%, transparent);
-  }
-
-  .updated {
-    display: flex;
-    gap: 9px;
-    align-items: center;
-    color: var(--dhc-muted);
-    font-size: 15px;
-    white-space: nowrap;
-  }
-
-  .updated svg {
-    width: 23px;
-    height: 23px;
-    opacity: 0.8;
-  }
-
   .flow {
-    display: grid;
-    grid-template-columns: minmax(135px, 0.72fr) minmax(250px, 1.8fr) minmax(135px, 0.72fr);
-    gap: clamp(12px, 2vw, 24px);
-    align-items: center;
-    margin: clamp(22px, 4vw, 34px) 0 clamp(22px, 3vw, 28px);
+    margin: clamp(20px, 3vw, 28px) 0 clamp(16px, 2.5vw, 24px);
   }
 
-  .reading {
-    min-width: 0;
+  .flow-readings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 14px;
   }
 
   .reading.return {
@@ -135,7 +81,7 @@ export const cardStyles = css`
   .label {
     color: var(--dhc-red);
     text-transform: uppercase;
-    font-size: clamp(14px, 1.9vw, 19px);
+    font-size: clamp(12px, 2.8vw, 15px);
     font-weight: 780;
     letter-spacing: 0.04em;
   }
@@ -145,10 +91,10 @@ export const cardStyles = css`
   }
 
   .value {
-    margin-top: 10px;
+    margin-top: 7px;
     color: var(--dhc-red);
-    font-size: clamp(36px, 6vw, 58px);
-    line-height: 0.96;
+    font-size: clamp(26px, 8vw, 42px);
+    line-height: 1;
     font-weight: 780;
   }
 
@@ -156,42 +102,42 @@ export const cardStyles = css`
     color: var(--dhc-blue);
   }
 
-  .caption {
-    margin-top: 12px;
-    color: var(--dhc-muted);
-    font-size: clamp(14px, 1.8vw, 19px);
-  }
-
   .plant {
     min-width: 0;
+    position: relative;
   }
 
   .plant svg {
     width: 100%;
     height: auto;
-    overflow: visible;
+    display: block;
+    overflow: hidden;
   }
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 31;
-    opacity: 0.98;
+    stroke-width: 32;
+    opacity: 0.88;
   }
 
   .pipe-hot {
     stroke: url(#hotGradient);
-    filter: drop-shadow(0 0 13px rgba(255, 86, 70, 0.72));
+    filter: drop-shadow(0 0 12px rgba(239, 111, 142, 0.42));
   }
 
   .pipe-cold {
     stroke: url(#coldGradient);
-    filter: drop-shadow(0 0 13px rgba(50, 129, 255, 0.72));
+    filter: drop-shadow(0 0 12px rgba(109, 142, 214, 0.42));
+  }
+
+  .house-group {
+    opacity: 0.74;
   }
 
   .house {
-    fill: color-mix(in srgb, var(--dhc-panel-bg) 78%, transparent);
+    fill: color-mix(in srgb, var(--dhc-card-bg) 48%, transparent);
     stroke: color-mix(in srgb, var(--dhc-muted) 42%, transparent);
-    stroke-width: 3;
+    stroke-width: 2.4;
   }
 
   .radiator,
@@ -201,7 +147,7 @@ export const cardStyles = css`
 
   .pipe-line,
   .spark {
-    stroke: rgba(255, 255, 255, 0.74);
+    stroke: rgba(255, 255, 255, 0.72);
     stroke-linecap: round;
     animation: drift 3.8s linear infinite;
   }
@@ -212,7 +158,7 @@ export const cardStyles = css`
 
   .spark {
     stroke-width: 4;
-    stroke-dasharray: 0.1 28;
+    stroke-dasharray: 0.1 27;
   }
 
   .arrow {
@@ -221,23 +167,28 @@ export const cardStyles = css`
     animation: pulse 2.8s ease-in-out infinite;
   }
 
+  .return-arrow {
+    transform-origin: 108px 147px;
+    animation-name: pulseBack;
+  }
+
   .metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
     gap: clamp(12px, 1.8vw, 20px);
   }
 
   .panel {
     min-width: 0;
     border: 1px solid var(--dhc-border);
-    border-radius: 18px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+    border-radius: 26px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.022)), var(--dhc-panel-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .metric {
-    min-height: 135px;
-    padding: clamp(18px, 2vw, 24px);
+    min-height: 112px;
+    padding: clamp(16px, 2vw, 22px);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -246,10 +197,9 @@ export const cardStyles = css`
   }
 
   .metric.delta {
-    align-items: flex-start;
-    text-align: left;
-    padding-left: clamp(22px, 4vw, 42px);
-    border-color: color-mix(in srgb, var(--dhc-green) 24%, var(--dhc-border));
+    align-items: center;
+    text-align: center;
+    border-color: color-mix(in srgb, var(--severity-color, var(--dhc-green)) 32%, var(--dhc-border));
   }
 
   .metric-label,
@@ -257,7 +207,7 @@ export const cardStyles = css`
   .diagnostic-label {
     color: var(--dhc-muted);
     text-transform: uppercase;
-    font-size: clamp(13px, 1.6vw, 17px);
+    font-size: clamp(12px, 2.4vw, 15px);
     font-weight: 720;
     letter-spacing: 0.045em;
   }
@@ -265,7 +215,7 @@ export const cardStyles = css`
   .delta-value {
     margin-top: 12px;
     color: var(--severity-color, var(--dhc-green));
-    font-size: clamp(44px, 7.2vw, 70px);
+    font-size: clamp(42px, 10vw, 64px);
     line-height: 0.98;
     font-weight: 820;
   }
@@ -276,7 +226,7 @@ export const cardStyles = css`
     align-items: center;
     margin-top: 18px;
     color: var(--severity-color, var(--dhc-green));
-    font-size: clamp(18px, 2.5vw, 26px);
+    font-size: clamp(17px, 4vw, 23px);
     font-weight: 700;
   }
 
@@ -492,41 +442,35 @@ export const cardStyles = css`
     }
   }
 
+  @keyframes pulseBack {
+    0%,
+    100% {
+      opacity: 0.72;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(-4px);
+    }
+  }
+
   @media (max-width: 760px) {
     ha-card {
       padding: 18px;
       border-radius: 22px;
     }
 
-    .header {
-      grid-template-columns: 1fr;
+    .flow-readings {
+      gap: 12px;
     }
 
-    .updated {
-      justify-content: flex-start;
-    }
-
-    .flow {
-      grid-template-columns: 1fr;
-    }
-
-    .reading.return {
-      text-align: left;
-    }
-
-    .plant {
-      order: -1;
+    .plant svg {
+      min-height: 116px;
     }
 
     .metrics,
     .diagnostics {
       grid-template-columns: 1fr;
-    }
-
-    .metric.delta {
-      align-items: center;
-      text-align: center;
-      padding-left: clamp(18px, 2vw, 24px);
     }
 
     .mini {

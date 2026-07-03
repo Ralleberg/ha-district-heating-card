@@ -720,46 +720,33 @@ function severityFromScore(score, deltaT, returnTemp, minDeltaT, maxReturnTemp) 
   }
   return "critical";
 }
-function lastUpdated(hass, config) {
-  var _a2, _b, _c;
-  const candidates = [
-    (_a2 = entity(hass, config.supply_temp_entity)) == null ? void 0 : _a2.last_updated,
-    (_b = entity(hass, config.return_temp_entity)) == null ? void 0 : _b.last_updated,
-    (_c = entity(hass, config.delta_t_entity)) == null ? void 0 : _c.last_updated
-  ].filter(Boolean);
-  const newest = candidates.map((candidate) => new Date(candidate)).filter((date) => Number.isFinite(date.getTime())).sort((left, right) => right.getTime() - left.getTime())[0];
-  if (!newest) {
-    return void 0;
-  }
-  return newest.toLocaleTimeString(void 0, { hour: "2-digit", minute: "2-digit" });
-}
 const cardStyles = i$3`
   :host {
     display: block;
     color: var(--primary-text-color, #f4f7fb);
-    --dhc-card-bg: color-mix(in srgb, var(--card-background-color, #101827) 82%, transparent);
-    --dhc-panel-bg: color-mix(in srgb, var(--card-background-color, #101827) 74%, transparent);
+    --dhc-card-bg: color-mix(in srgb, var(--card-background-color, #171925) 82%, transparent);
+    --dhc-panel-bg: color-mix(in srgb, var(--card-background-color, #171925) 68%, transparent);
     --dhc-border: color-mix(in srgb, var(--divider-color, #738099) 40%, transparent);
     --dhc-muted: var(--secondary-text-color, #aeb7c8);
-    --dhc-red: var(--error-color, #ff665c);
-    --dhc-red-soft: #ff8d6f;
-    --dhc-blue: var(--info-color, #4f91ff);
+    --dhc-red: #ef6f8e;
+    --dhc-red-soft: #f27c98;
+    --dhc-blue: #6d8ed6;
     --dhc-green: var(--success-color, #54c76d);
     --dhc-yellow: var(--warning-color, #f4bf45);
     --dhc-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
-    --dhc-radius: var(--ha-card-border-radius, 28px);
+    --dhc-radius: var(--ha-card-border-radius, 30px);
     font-family: var(--primary-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   }
 
   ha-card {
     position: relative;
     overflow: hidden;
-    padding: clamp(18px, 2.8vw, 32px);
+    padding: clamp(20px, 3vw, 30px);
     border-radius: var(--dhc-radius);
     border: 1px solid var(--dhc-border);
     background:
-      radial-gradient(circle at 16% 14%, rgba(255, 103, 91, 0.16), transparent 30%),
-      radial-gradient(circle at 86% 24%, rgba(61, 135, 255, 0.2), transparent 32%),
+      radial-gradient(circle at 18% 22%, rgba(239, 111, 142, 0.14), transparent 36%),
+      radial-gradient(circle at 88% 28%, rgba(109, 142, 214, 0.18), transparent 38%),
       linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 32%),
       var(--dhc-card-bg);
     box-shadow: var(--dhc-shadow);
@@ -767,6 +754,7 @@ const cardStyles = i$3`
   }
 
   .header,
+  .flow,
   .metrics,
   .secondary,
   .diagnostics {
@@ -775,34 +763,13 @@ const cardStyles = i$3`
   }
 
   .header {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: start;
+    display: block;
   }
 
-  .title {
-    display: flex;
-    gap: 13px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .title-icon,
-  .status-icon {
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    color: var(--dhc-red-soft);
-  }
-
-  .title-icon svg,
   .status-icon svg,
   .metric-icon svg,
   .mini-icon svg,
-  .diagnostic-icon svg,
-  .updated svg {
+  .diagnostic-icon svg {
     width: 100%;
     height: 100%;
     fill: currentColor;
@@ -810,55 +777,21 @@ const cardStyles = i$3`
 
   h2 {
     margin: 0;
-    font-size: clamp(28px, 4vw, 44px);
+    font-size: clamp(28px, 7vw, 42px);
     line-height: 1;
-    font-weight: 720;
+    font-weight: 760;
     letter-spacing: 0;
   }
 
-  .mode {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-top: 10px;
-    color: var(--dhc-muted);
-    font-size: clamp(15px, 2vw, 20px);
-  }
-
-  .mode::before {
-    content: "";
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--dhc-green);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--dhc-green) 70%, transparent);
-  }
-
-  .updated {
-    display: flex;
-    gap: 9px;
-    align-items: center;
-    color: var(--dhc-muted);
-    font-size: 15px;
-    white-space: nowrap;
-  }
-
-  .updated svg {
-    width: 23px;
-    height: 23px;
-    opacity: 0.8;
-  }
-
   .flow {
-    display: grid;
-    grid-template-columns: minmax(135px, 0.72fr) minmax(250px, 1.8fr) minmax(135px, 0.72fr);
-    gap: clamp(12px, 2vw, 24px);
-    align-items: center;
-    margin: clamp(22px, 4vw, 34px) 0 clamp(22px, 3vw, 28px);
+    margin: clamp(20px, 3vw, 28px) 0 clamp(16px, 2.5vw, 24px);
   }
 
-  .reading {
-    min-width: 0;
+  .flow-readings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 14px;
   }
 
   .reading.return {
@@ -868,7 +801,7 @@ const cardStyles = i$3`
   .label {
     color: var(--dhc-red);
     text-transform: uppercase;
-    font-size: clamp(14px, 1.9vw, 19px);
+    font-size: clamp(12px, 2.8vw, 15px);
     font-weight: 780;
     letter-spacing: 0.04em;
   }
@@ -878,10 +811,10 @@ const cardStyles = i$3`
   }
 
   .value {
-    margin-top: 10px;
+    margin-top: 7px;
     color: var(--dhc-red);
-    font-size: clamp(36px, 6vw, 58px);
-    line-height: 0.96;
+    font-size: clamp(26px, 8vw, 42px);
+    line-height: 1;
     font-weight: 780;
   }
 
@@ -889,42 +822,42 @@ const cardStyles = i$3`
     color: var(--dhc-blue);
   }
 
-  .caption {
-    margin-top: 12px;
-    color: var(--dhc-muted);
-    font-size: clamp(14px, 1.8vw, 19px);
-  }
-
   .plant {
     min-width: 0;
+    position: relative;
   }
 
   .plant svg {
     width: 100%;
     height: auto;
-    overflow: visible;
+    display: block;
+    overflow: hidden;
   }
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 31;
-    opacity: 0.98;
+    stroke-width: 32;
+    opacity: 0.88;
   }
 
   .pipe-hot {
     stroke: url(#hotGradient);
-    filter: drop-shadow(0 0 13px rgba(255, 86, 70, 0.72));
+    filter: drop-shadow(0 0 12px rgba(239, 111, 142, 0.42));
   }
 
   .pipe-cold {
     stroke: url(#coldGradient);
-    filter: drop-shadow(0 0 13px rgba(50, 129, 255, 0.72));
+    filter: drop-shadow(0 0 12px rgba(109, 142, 214, 0.42));
+  }
+
+  .house-group {
+    opacity: 0.74;
   }
 
   .house {
-    fill: color-mix(in srgb, var(--dhc-panel-bg) 78%, transparent);
+    fill: color-mix(in srgb, var(--dhc-card-bg) 48%, transparent);
     stroke: color-mix(in srgb, var(--dhc-muted) 42%, transparent);
-    stroke-width: 3;
+    stroke-width: 2.4;
   }
 
   .radiator,
@@ -934,7 +867,7 @@ const cardStyles = i$3`
 
   .pipe-line,
   .spark {
-    stroke: rgba(255, 255, 255, 0.74);
+    stroke: rgba(255, 255, 255, 0.72);
     stroke-linecap: round;
     animation: drift 3.8s linear infinite;
   }
@@ -945,7 +878,7 @@ const cardStyles = i$3`
 
   .spark {
     stroke-width: 4;
-    stroke-dasharray: 0.1 28;
+    stroke-dasharray: 0.1 27;
   }
 
   .arrow {
@@ -954,23 +887,28 @@ const cardStyles = i$3`
     animation: pulse 2.8s ease-in-out infinite;
   }
 
+  .return-arrow {
+    transform-origin: 108px 147px;
+    animation-name: pulseBack;
+  }
+
   .metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
     gap: clamp(12px, 1.8vw, 20px);
   }
 
   .panel {
     min-width: 0;
     border: 1px solid var(--dhc-border);
-    border-radius: 18px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+    border-radius: 26px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.022)), var(--dhc-panel-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .metric {
-    min-height: 135px;
-    padding: clamp(18px, 2vw, 24px);
+    min-height: 112px;
+    padding: clamp(16px, 2vw, 22px);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -979,10 +917,9 @@ const cardStyles = i$3`
   }
 
   .metric.delta {
-    align-items: flex-start;
-    text-align: left;
-    padding-left: clamp(22px, 4vw, 42px);
-    border-color: color-mix(in srgb, var(--dhc-green) 24%, var(--dhc-border));
+    align-items: center;
+    text-align: center;
+    border-color: color-mix(in srgb, var(--severity-color, var(--dhc-green)) 32%, var(--dhc-border));
   }
 
   .metric-label,
@@ -990,7 +927,7 @@ const cardStyles = i$3`
   .diagnostic-label {
     color: var(--dhc-muted);
     text-transform: uppercase;
-    font-size: clamp(13px, 1.6vw, 17px);
+    font-size: clamp(12px, 2.4vw, 15px);
     font-weight: 720;
     letter-spacing: 0.045em;
   }
@@ -998,7 +935,7 @@ const cardStyles = i$3`
   .delta-value {
     margin-top: 12px;
     color: var(--severity-color, var(--dhc-green));
-    font-size: clamp(44px, 7.2vw, 70px);
+    font-size: clamp(42px, 10vw, 64px);
     line-height: 0.98;
     font-weight: 820;
   }
@@ -1009,7 +946,7 @@ const cardStyles = i$3`
     align-items: center;
     margin-top: 18px;
     color: var(--severity-color, var(--dhc-green));
-    font-size: clamp(18px, 2.5vw, 26px);
+    font-size: clamp(17px, 4vw, 23px);
     font-weight: 700;
   }
 
@@ -1225,41 +1162,35 @@ const cardStyles = i$3`
     }
   }
 
+  @keyframes pulseBack {
+    0%,
+    100% {
+      opacity: 0.72;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(-4px);
+    }
+  }
+
   @media (max-width: 760px) {
     ha-card {
       padding: 18px;
       border-radius: 22px;
     }
 
-    .header {
-      grid-template-columns: 1fr;
+    .flow-readings {
+      gap: 12px;
     }
 
-    .updated {
-      justify-content: flex-start;
-    }
-
-    .flow {
-      grid-template-columns: 1fr;
-    }
-
-    .reading.return {
-      text-align: left;
-    }
-
-    .plant {
-      order: -1;
+    .plant svg {
+      min-height: 116px;
     }
 
     .metrics,
     .diagnostics {
       grid-template-columns: 1fr;
-    }
-
-    .metric.delta {
-      align-items: center;
-      text-align: center;
-      padding-left: clamp(18px, 2vw, 24px);
     }
 
     .mini {
@@ -1496,24 +1427,18 @@ let HaDistrictHeatingCard = class extends i {
     const deltaT = computeDeltaT(this.hass, this.config);
     const result = efficiency(this.config, deltaT, returned);
     const severityClass = `severity-${result.severity}`;
-    const updated = lastUpdated(this.hass, this.config);
     return b`
       <ha-card>
         <div class="header">
-          <div class="title">
-            <span class="title-icon">${icons.flame}</span>
-            <div>
-              <h2>${this.config.name ?? "Fjernvarme"}</h2>
-              ${this.config.show_status !== false ? b`<div class="mode">Aktuel drift</div>` : null}
-            </div>
-          </div>
-          ${updated ? b`<div class="updated">${icons.clock}<span>Opdateret ${updated}</span></div>` : null}
+          <h2>${this.config.name ?? "Fjernvarme"}</h2>
         </div>
 
         <section class="flow" aria-label="Fjernvarme flow">
-          ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), "Fra fjernvarmen")}
+          <div class="flow-readings">
+            ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")))}
+            ${this.renderReading("Returløb", formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), true)}
+          </div>
           ${this.renderPlant()}
-          ${this.renderReading("Returløb", formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), "Til fjernvarmen", true)}
         </section>
 
         <section class="metrics">
@@ -1532,61 +1457,62 @@ let HaDistrictHeatingCard = class extends i {
       </ha-card>
     `;
   }
-  renderReading(label, value, caption, isReturn = false) {
+  renderReading(label, value, isReturn = false) {
     return b`
       <div class=${`reading ${isReturn ? "return" : ""}`}>
         <div class="label">${label}</div>
         <div class="value">${value}</div>
-        <div class="caption">${caption}</div>
       </div>
     `;
   }
   renderPlant() {
     return b`
       <div class="plant">
-        <svg viewBox="0 0 760 250" role="img" aria-label="Fjernvarmerør gennem huset">
+        <svg viewBox="0 0 760 210" role="img" aria-label="Fjernvarmerør gennem huset">
           <defs>
             <linearGradient id="hotGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#b53129" />
-              <stop offset="44%" stop-color="#ff725f" />
-              <stop offset="100%" stop-color="#8f2c2c" />
+              <stop offset="0%" stop-color="#612f3f" />
+              <stop offset="52%" stop-color="#d75f76" />
+              <stop offset="100%" stop-color="#783446" />
             </linearGradient>
             <linearGradient id="coldGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#143d84" />
-              <stop offset="50%" stop-color="#55a5ff" />
-              <stop offset="100%" stop-color="#1a55b7" />
+              <stop offset="0%" stop-color="#263c73" />
+              <stop offset="50%" stop-color="#4d83d8" />
+              <stop offset="100%" stop-color="#203965" />
             </linearGradient>
           </defs>
 
-          <line class="pipe-base pipe-hot" x1="22" y1="108" x2="276" y2="108" />
-          <line class="pipe-base pipe-cold" x1="484" y1="108" x2="738" y2="108" />
+          <line class="pipe-base pipe-hot" x1="22" y1="64" x2="738" y2="64" />
+          <line class="pipe-base pipe-cold" x1="22" y1="147" x2="738" y2="147" />
 
-          <path class="house" d="M334 92V54l-35 1c-10 0-14-13-6-19L380 7a20 20 0 0 1 24 0l87 29c8 6 4 19-6 19h-35v118c0 11-9 20-20 20h-76c-11 0-20-9-20-20V92Z" />
+          <g class="house-group">
+            <path class="house" d="M331 90V54h-32c-9 0-13-12-6-17l88-31a20 20 0 0 1 22 0l88 31c7 5 3 17-6 17h-32v103c0 11-9 20-20 20h-82c-11 0-20-9-20-20V90Z" />
 
-          <g class="radiator" fill="currentColor" opacity="0.84">
-            <rect x="351" y="118" width="16" height="66" rx="8" />
-            <rect x="381" y="118" width="16" height="66" rx="8" />
-            <rect x="411" y="118" width="16" height="66" rx="8" />
-            <rect x="441" y="122" width="9" height="58" rx="5" />
-            <rect x="345" y="136" width="112" height="10" rx="5" />
-          </g>
+            <g class="radiator" fill="currentColor" opacity="0.84">
+              <rect x="350" y="110" width="13" height="55" rx="7" />
+              <rect x="375" y="110" width="13" height="55" rx="7" />
+              <rect x="400" y="110" width="13" height="55" rx="7" />
+              <rect x="425" y="114" width="8" height="47" rx="4" />
+              <rect x="344" y="126" width="96" height="8" rx="4" />
+            </g>
 
-          <g class="heat-wave" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.86">
-            <path d="M371 87c-14-17 14-22 0-39" />
-            <path d="M399 87c-14-17 14-22 0-39" />
-            <path d="M427 87c-14-17 14-22 0-39" />
+            <g class="heat-wave" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity="0.86">
+              <path d="M365 91c-13-16 13-21 0-37" />
+              <path d="M392 91c-13-16 13-21 0-37" />
+              <path d="M419 91c-13-16 13-21 0-37" />
+            </g>
           </g>
 
           <g opacity="0.9">
-            <line class="pipe-line" x1="36" y1="88" x2="106" y2="88" stroke-dasharray="46 44" />
-            <line class="pipe-line" x1="124" y1="113" x2="228" y2="113" stroke-dasharray="72 55" />
-            <line class="spark" x1="52" y1="131" x2="264" y2="131" />
-            <polygon class="arrow" points="221,91 259,108 221,125" />
+            <line class="pipe-line hot-line" x1="52" y1="45" x2="728" y2="45" stroke-dasharray="42 48" />
+            <line class="pipe-line hot-line" x1="30" y1="76" x2="704" y2="76" stroke-dasharray="12 34 52 42" />
+            <line class="spark hot-line" x1="44" y1="64" x2="716" y2="64" />
+            <polygon class="arrow supply-arrow" points="632,42 671,64 632,86" />
 
-            <line class="pipe-line" x1="504" y1="88" x2="586" y2="88" stroke-dasharray="46 44" />
-            <line class="pipe-line" x1="604" y1="113" x2="714" y2="113" stroke-dasharray="72 55" />
-            <line class="spark" x1="500" y1="131" x2="724" y2="131" />
-            <polygon class="arrow" points="674,91 712,108 674,125" />
+            <line class="pipe-line cold-line" x1="32" y1="128" x2="710" y2="128" stroke-dasharray="42 48" />
+            <line class="pipe-line cold-line" x1="54" y1="159" x2="730" y2="159" stroke-dasharray="12 34 52 42" />
+            <line class="spark cold-line" x1="44" y1="147" x2="716" y2="147" />
+            <polygon class="arrow return-arrow" points="128,125 89,147 128,169" />
           </g>
         </svg>
       </div>
