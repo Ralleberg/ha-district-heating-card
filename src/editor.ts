@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { languageFromHass, translate } from "./i18n";
 import { DEFAULT_CONFIG } from "./utils";
 import { editorStyles } from "./styles";
 import type { DistrictHeatingCardConfig, HomeAssistant } from "./types";
@@ -24,40 +25,41 @@ export class DistrictHeatingCardEditor extends LitElement {
     if (!this.config) {
       return html``;
     }
+    const language = languageFromHass(this.hass);
 
     return html`
-      <div class="section">Temperaturer</div>
-      ${this.entityPicker("Fremløbstemperatur", "supply_temp_entity", true)}
-      ${this.entityPicker("Returtemperatur", "return_temp_entity", true)}
-      ${this.entityPicker("Delta T", "delta_t_entity")}
+      <div class="section">${translate(language, "editorTemperatures")}</div>
+      ${this.entityPicker(translate(language, "editorSupplyTemp"), "supply_temp_entity", true)}
+      ${this.entityPicker(translate(language, "editorReturnTemp"), "return_temp_entity", true)}
+      ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
-      <div class="section">Valgfrie driftstal</div>
-      ${this.entityPicker("Effekt", "power_entity")}
-      ${this.entityPicker("Energi i dag", "energy_today_entity")}
-      ${this.entityPicker("Forbrug i år", "yearly_energy_entity")}
+      <div class="section">${translate(language, "editorOptionalMetrics")}</div>
+      ${this.entityPicker(translate(language, "power"), "power_entity")}
+      ${this.entityPicker(translate(language, "editorEnergyToday"), "energy_today_entity")}
+      ${this.entityPicker(translate(language, "editorYearlyEnergy"), "yearly_energy_entity")}
 
-      <div class="section">Input til vurdering</div>
-      ${this.entityPicker("Udetemperatur", "outdoor_temp_entity")}
-      ${this.entityPicker("Indetemperatur", "indoor_temp_entity")}
-      ${this.entityPicker("Gennemsnitlig Delta T", "average_delta_t_entity")}
+      <div class="section">${translate(language, "editorAssessmentInput")}</div>
+      ${this.entityPicker(translate(language, "editorOutdoorTemp"), "outdoor_temp_entity")}
+      ${this.entityPicker(translate(language, "editorIndoorTemp"), "indoor_temp_entity")}
+      ${this.entityPicker(translate(language, "editorAverageDeltaT"), "average_delta_t_entity")}
 
-      <div class="section">Effektivitet</div>
-      ${this.numberField("Minimum Delta T", "min_delta_t")}
-      ${this.numberField("God Delta T", "good_delta_t")}
-      ${this.numberField("Maks returtemperatur", "max_return_temp")}
-      ${this.numberField("God returtemperatur", "good_return_temp")}
+      <div class="section">${translate(language, "editorEfficiency")}</div>
+      ${this.numberField(translate(language, "editorMinDeltaT"), "min_delta_t")}
+      ${this.numberField(translate(language, "editorGoodDeltaT"), "good_delta_t")}
+      ${this.numberField(translate(language, "editorMaxReturnTemp"), "max_return_temp")}
+      ${this.numberField(translate(language, "editorGoodReturnTemp"), "good_return_temp")}
 
-      <div class="section">Fremløb farveskala</div>
-      ${this.numberField("Lys farve ved °C", "supply_color_low_temp")}
-      ${this.textField("Lys farve", "supply_color_low")}
-      ${this.numberField("Mørk farve ved °C", "supply_color_high_temp")}
-      ${this.textField("Mørk farve", "supply_color_high")}
+      <div class="section">${translate(language, "editorSupplyScale")}</div>
+      ${this.numberField(translate(language, "editorLightColorAt"), "supply_color_low_temp")}
+      ${this.textField(translate(language, "editorLightColor"), "supply_color_low")}
+      ${this.numberField(translate(language, "editorDarkColorAt"), "supply_color_high_temp")}
+      ${this.textField(translate(language, "editorDarkColor"), "supply_color_high")}
 
-      <div class="section">Returløb farveskala</div>
-      ${this.numberField("Lys farve ved °C", "return_color_low_temp")}
-      ${this.textField("Lys farve", "return_color_low")}
-      ${this.numberField("Blå farve ved °C", "return_color_high_temp")}
-      ${this.textField("Blå farve", "return_color_high")}
+      <div class="section">${translate(language, "editorReturnScale")}</div>
+      ${this.numberField(translate(language, "editorLightColorAt"), "return_color_low_temp")}
+      ${this.textField(translate(language, "editorLightColor"), "return_color_low")}
+      ${this.numberField(translate(language, "editorBlueColorAt"), "return_color_high_temp")}
+      ${this.textField(translate(language, "editorBlueColor"), "return_color_high")}
     `;
   }
 

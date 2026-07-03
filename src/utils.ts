@@ -1,4 +1,5 @@
-import type { DistrictHeatingCardConfig, EfficiencyResult, HassEntity, HomeAssistant, Severity } from "./types";
+import { translate } from "./i18n";
+import type { DistrictHeatingCardConfig, EfficiencyResult, HassEntity, HomeAssistant, Severity, TranslationLanguage } from "./types";
 
 const UNAVAILABLE_STATES = new Set(["unknown", "unavailable", "none", ""]);
 
@@ -93,16 +94,21 @@ export function clamp(value: number, min = 0, max = 100): number {
   return Math.min(Math.max(value, min), max);
 }
 
-export function efficiency(config: DistrictHeatingCardConfig, deltaT: number | undefined, returnTemp: number | undefined): EfficiencyResult {
+export function efficiency(
+  config: DistrictHeatingCardConfig,
+  deltaT: number | undefined,
+  returnTemp: number | undefined,
+  language: TranslationLanguage = "da",
+): EfficiencyResult {
   const merged = mergeConfig(config);
 
   if (deltaT === undefined || returnTemp === undefined) {
     return {
       severity: "unknown",
-      title: "Mangler data",
-      message: "Tilføj fremløb, returløb og eventuelt Delta T for at vurdere driften.",
-      deltaLabel: "Ukendt",
-      returnLabel: "Ukendt",
+      title: translate(language, "missingData"),
+      message: translate(language, "missingMessage"),
+      deltaLabel: translate(language, "unknown"),
+      returnLabel: translate(language, "unknown"),
       deltaScore: 0,
       returnScore: 0,
     };
@@ -112,23 +118,23 @@ export function efficiency(config: DistrictHeatingCardConfig, deltaT: number | u
   const returnScore = clamp(((merged.max_return_temp - returnTemp) / (merged.max_return_temp - merged.good_return_temp || 1)) * 100);
   const score = deltaScore * 0.55 + returnScore * 0.45;
   const severity = severityFromScore(score, deltaT, returnTemp, merged.min_delta_t, merged.max_return_temp);
-  const message = efficiencyMessage(severity, deltaT, returnTemp, merged.min_delta_t, merged.good_delta_t, merged.max_return_temp, merged.good_return_temp);
+  const message = efficiencyMessage(language, severity, deltaT, returnTemp, merged.min_delta_t, merged.good_delta_t, merged.max_return_temp, merged.good_return_temp);
 
   const copy = {
     excellent: {
-      title: "Meget effektiv udnyttelse",
+      title: translate(language, "excellentTitle"),
     },
     good: {
-      title: "God udnyttelse",
+      title: translate(language, "goodTitle"),
     },
     warning: {
-      title: "Kan optimeres",
+      title: translate(language, "warningTitle"),
     },
     critical: {
-      title: "Lav effektivitet",
+      title: translate(language, "criticalTitle"),
     },
     unknown: {
-      title: "Mangler data",
+      title: translate(language, "missingData"),
     },
   } satisfies Record<Severity, Pick<EfficiencyResult, "title">>;
 
@@ -136,14 +142,15 @@ export function efficiency(config: DistrictHeatingCardConfig, deltaT: number | u
     severity,
     ...copy[severity],
     message,
-    deltaLabel: deltaT >= merged.good_delta_t ? "Meget god" : deltaT >= merged.min_delta_t ? "God" : "Lav",
-    returnLabel: returnTemp <= merged.good_return_temp ? "Meget god" : returnTemp <= merged.max_return_temp ? "God" : "Høj",
+    deltaLabel: deltaT >= merged.good_delta_t ? translate(language, "veryGood") : deltaT >= merged.min_delta_t ? translate(language, "good") : translate(language, "low"),
+    returnLabel: returnTemp <= merged.good_return_temp ? translate(language, "veryGood") : returnTemp <= merged.max_return_temp ? translate(language, "good") : translate(language, "high"),
     deltaScore,
     returnScore,
   };
 }
 
 function efficiencyMessage(
+  language: TranslationLanguage,
   severity: Severity,
   deltaT: number,
   returnTemp: number,
@@ -156,40 +163,46 @@ function efficiencyMessage(
   const highReturn = returnTemp > maxReturnTemp;
   const notGoodDelta = deltaT < goodDeltaT;
   const notGoodReturn = returnTemp > goodReturnTemp;
+  const values = {
+    minDeltaT: minDeltaT.toFixed(1),
+    goodDeltaT: goodDeltaT.toFixed(1),
+    maxReturnTemp: maxReturnTemp.toFixed(1),
+    goodReturnTemp: goodReturnTemp.toFixed(1),
+  };
 
   if (lowDelta && highReturn) {
-    return `Afkølingen er under ${minDeltaT.toFixed(1)} °C, og returtemperaturen er over ${maxReturnTemp.toFixed(1)} °C.`;
+    return translate(language, "lowDeltaHighReturn", values);
   }
 
   if (lowDelta) {
-    return `Afkølingen er under minimum på ${minDeltaT.toFixed(1)} °C. Returtemperaturen er acceptabel.`;
+    return translate(language, "lowDelta", values);
   }
 
   if (highReturn) {
-    return `Returtemperaturen er over maksimum på ${maxReturnTemp.toFixed(1)} °C. Afkølingen er acceptabel.`;
+    return translate(language, "highReturn", values);
   }
 
   if (severity === "excellent") {
-    return `Afkølingen er over ${goodDeltaT.toFixed(1)} °C, og returtemperaturen er under ${goodReturnTemp.toFixed(1)} °C.`;
+    return translate(language, "excellentMessage", values);
   }
 
   if (severity === "good") {
-    return "Afkøling og returtemperatur ligger i et sundt område.";
+    return translate(language, "goodMessage", values);
   }
 
   if (notGoodDelta && notGoodReturn) {
-    return `Afkøling og returtemperatur er acceptable, men ikke i det gode område endnu.`;
+    return translate(language, "notGoodBoth", values);
   }
 
   if (notGoodDelta) {
-    return `Afkølingen er acceptabel, men under målet på ${goodDeltaT.toFixed(1)} °C.`;
+    return translate(language, "notGoodDelta", values);
   }
 
   if (notGoodReturn) {
-    return `Returtemperaturen er acceptabel, men over målet på ${goodReturnTemp.toFixed(1)} °C.`;
+    return translate(language, "notGoodReturn", values);
   }
 
-  return "Anlægget kører inden for de valgte grænser.";
+  return translate(language, "withinLimits", values);
 }
 
 export function flowColor(

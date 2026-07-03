@@ -600,6 +600,125 @@ function n2(t2) {
 function r(r2) {
   return n2({ ...r2, state: true, attribute: false });
 }
+const translations = {
+  da: {
+    supply: "Fremløb",
+    return: "Returløb",
+    flowAria: "Fjernvarme flow",
+    plantAria: "Fjernvarmerør gennem huset",
+    cooling: "afkøling",
+    power: "Effekt",
+    today: "I dag",
+    year: "I år",
+    missingData: "Mangler data",
+    excellentTitle: "Meget effektiv udnyttelse",
+    goodTitle: "God udnyttelse",
+    warningTitle: "Kan optimeres",
+    criticalTitle: "Lav effektivitet",
+    missingMessage: "Tilføj fremløb, returløb og eventuelt Delta T for at vurdere driften.",
+    lowDeltaHighReturn: "Afkølingen er under {minDeltaT} °C, og returtemperaturen er over {maxReturnTemp} °C.",
+    lowDelta: "Afkølingen er under minimum på {minDeltaT} °C. Returtemperaturen er acceptabel.",
+    highReturn: "Returtemperaturen er over maksimum på {maxReturnTemp} °C. Afkølingen er acceptabel.",
+    excellentMessage: "Afkølingen er over {goodDeltaT} °C, og returtemperaturen er under {goodReturnTemp} °C.",
+    goodMessage: "Afkøling og returtemperatur ligger i et sundt område.",
+    notGoodBoth: "Afkøling og returtemperatur er acceptable, men ikke i det gode område endnu.",
+    notGoodDelta: "Afkølingen er acceptabel, men under målet på {goodDeltaT} °C.",
+    notGoodReturn: "Returtemperaturen er acceptabel, men over målet på {goodReturnTemp} °C.",
+    withinLimits: "Anlægget kører inden for de valgte grænser.",
+    veryGood: "Meget god",
+    good: "God",
+    low: "Lav",
+    high: "Høj",
+    unknown: "Ukendt",
+    editorTemperatures: "Temperaturer",
+    editorSupplyTemp: "Fremløbstemperatur",
+    editorReturnTemp: "Returtemperatur",
+    editorDeltaT: "Delta T",
+    editorOptionalMetrics: "Valgfrie driftstal",
+    editorEnergyToday: "Energi i dag",
+    editorYearlyEnergy: "Forbrug i år",
+    editorAssessmentInput: "Input til vurdering",
+    editorOutdoorTemp: "Udetemperatur",
+    editorIndoorTemp: "Indetemperatur",
+    editorAverageDeltaT: "Gennemsnitlig Delta T",
+    editorEfficiency: "Effektivitet",
+    editorMinDeltaT: "Minimum Delta T",
+    editorGoodDeltaT: "God Delta T",
+    editorMaxReturnTemp: "Maks returtemperatur",
+    editorGoodReturnTemp: "God returtemperatur",
+    editorSupplyScale: "Fremløb farveskala",
+    editorReturnScale: "Returløb farveskala",
+    editorLightColorAt: "Lys farve ved °C",
+    editorDarkColorAt: "Mørk farve ved °C",
+    editorBlueColorAt: "Blå farve ved °C",
+    editorLightColor: "Lys farve",
+    editorDarkColor: "Mørk farve",
+    editorBlueColor: "Blå farve"
+  },
+  en: {
+    supply: "Supply",
+    return: "Return",
+    flowAria: "District heating flow",
+    plantAria: "District heating pipes through the house",
+    cooling: "cooling",
+    power: "Power",
+    today: "Today",
+    year: "Year",
+    missingData: "Missing data",
+    excellentTitle: "Very efficient utilization",
+    goodTitle: "Good utilization",
+    warningTitle: "Can be optimized",
+    criticalTitle: "Low efficiency",
+    missingMessage: "Add supply, return and optionally Delta T to assess operation.",
+    lowDeltaHighReturn: "Cooling is below {minDeltaT} °C, and return temperature is above {maxReturnTemp} °C.",
+    lowDelta: "Cooling is below the minimum of {minDeltaT} °C. Return temperature is acceptable.",
+    highReturn: "Return temperature is above the maximum of {maxReturnTemp} °C. Cooling is acceptable.",
+    excellentMessage: "Cooling is above {goodDeltaT} °C, and return temperature is below {goodReturnTemp} °C.",
+    goodMessage: "Cooling and return temperature are in a healthy range.",
+    notGoodBoth: "Cooling and return temperature are acceptable, but not yet in the good range.",
+    notGoodDelta: "Cooling is acceptable, but below the target of {goodDeltaT} °C.",
+    notGoodReturn: "Return temperature is acceptable, but above the target of {goodReturnTemp} °C.",
+    withinLimits: "The system is operating within the configured limits.",
+    veryGood: "Very good",
+    good: "Good",
+    low: "Low",
+    high: "High",
+    unknown: "Unknown",
+    editorTemperatures: "Temperatures",
+    editorSupplyTemp: "Supply temperature",
+    editorReturnTemp: "Return temperature",
+    editorDeltaT: "Delta T",
+    editorOptionalMetrics: "Optional metrics",
+    editorEnergyToday: "Energy today",
+    editorYearlyEnergy: "Yearly energy",
+    editorAssessmentInput: "Assessment input",
+    editorOutdoorTemp: "Outdoor temperature",
+    editorIndoorTemp: "Indoor temperature",
+    editorAverageDeltaT: "Average Delta T",
+    editorEfficiency: "Efficiency",
+    editorMinDeltaT: "Minimum Delta T",
+    editorGoodDeltaT: "Good Delta T",
+    editorMaxReturnTemp: "Max return temperature",
+    editorGoodReturnTemp: "Good return temperature",
+    editorSupplyScale: "Supply color scale",
+    editorReturnScale: "Return color scale",
+    editorLightColorAt: "Light color at °C",
+    editorDarkColorAt: "Dark color at °C",
+    editorBlueColorAt: "Blue color at °C",
+    editorLightColor: "Light color",
+    editorDarkColor: "Dark color",
+    editorBlueColor: "Blue color"
+  }
+};
+function languageFromHass(hass) {
+  var _a2;
+  const language = (((_a2 = hass == null ? void 0 : hass.locale) == null ? void 0 : _a2.language) ?? (hass == null ? void 0 : hass.language) ?? "da").toLowerCase();
+  return language.startsWith("en") ? "en" : "da";
+}
+function translate(language, key, values = {}) {
+  const template = translations[language][key] ?? translations.da[key] ?? key;
+  return Object.entries(values).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, value), template);
+}
 const UNAVAILABLE_STATES = /* @__PURE__ */ new Set(["unknown", "unavailable", "none", ""]);
 const DEFAULT_CONFIG = {
   min_delta_t: 20,
@@ -665,15 +784,15 @@ function computeDeltaT(hass, config) {
 function clamp(value, min = 0, max = 100) {
   return Math.min(Math.max(value, min), max);
 }
-function efficiency(config, deltaT, returnTemp) {
+function efficiency(config, deltaT, returnTemp, language = "da") {
   const merged = mergeConfig(config);
   if (deltaT === void 0 || returnTemp === void 0) {
     return {
       severity: "unknown",
-      title: "Mangler data",
-      message: "Tilføj fremløb, returløb og eventuelt Delta T for at vurdere driften.",
-      deltaLabel: "Ukendt",
-      returnLabel: "Ukendt",
+      title: translate(language, "missingData"),
+      message: translate(language, "missingMessage"),
+      deltaLabel: translate(language, "unknown"),
+      returnLabel: translate(language, "unknown"),
       deltaScore: 0,
       returnScore: 0
     };
@@ -682,64 +801,70 @@ function efficiency(config, deltaT, returnTemp) {
   const returnScore = clamp((merged.max_return_temp - returnTemp) / (merged.max_return_temp - merged.good_return_temp || 1) * 100);
   const score = deltaScore * 0.55 + returnScore * 0.45;
   const severity = severityFromScore(score, deltaT, returnTemp, merged.min_delta_t, merged.max_return_temp);
-  const message = efficiencyMessage(severity, deltaT, returnTemp, merged.min_delta_t, merged.good_delta_t, merged.max_return_temp, merged.good_return_temp);
+  const message = efficiencyMessage(language, severity, deltaT, returnTemp, merged.min_delta_t, merged.good_delta_t, merged.max_return_temp, merged.good_return_temp);
   const copy = {
     excellent: {
-      title: "Meget effektiv udnyttelse"
+      title: translate(language, "excellentTitle")
     },
     good: {
-      title: "God udnyttelse"
+      title: translate(language, "goodTitle")
     },
     warning: {
-      title: "Kan optimeres"
+      title: translate(language, "warningTitle")
     },
     critical: {
-      title: "Lav effektivitet"
+      title: translate(language, "criticalTitle")
     },
     unknown: {
-      title: "Mangler data"
+      title: translate(language, "missingData")
     }
   };
   return {
     severity,
     ...copy[severity],
     message,
-    deltaLabel: deltaT >= merged.good_delta_t ? "Meget god" : deltaT >= merged.min_delta_t ? "God" : "Lav",
-    returnLabel: returnTemp <= merged.good_return_temp ? "Meget god" : returnTemp <= merged.max_return_temp ? "God" : "Høj",
+    deltaLabel: deltaT >= merged.good_delta_t ? translate(language, "veryGood") : deltaT >= merged.min_delta_t ? translate(language, "good") : translate(language, "low"),
+    returnLabel: returnTemp <= merged.good_return_temp ? translate(language, "veryGood") : returnTemp <= merged.max_return_temp ? translate(language, "good") : translate(language, "high"),
     deltaScore,
     returnScore
   };
 }
-function efficiencyMessage(severity, deltaT, returnTemp, minDeltaT, goodDeltaT, maxReturnTemp, goodReturnTemp) {
+function efficiencyMessage(language, severity, deltaT, returnTemp, minDeltaT, goodDeltaT, maxReturnTemp, goodReturnTemp) {
   const lowDelta = deltaT < minDeltaT;
   const highReturn = returnTemp > maxReturnTemp;
   const notGoodDelta = deltaT < goodDeltaT;
   const notGoodReturn = returnTemp > goodReturnTemp;
+  const values = {
+    minDeltaT: minDeltaT.toFixed(1),
+    goodDeltaT: goodDeltaT.toFixed(1),
+    maxReturnTemp: maxReturnTemp.toFixed(1),
+    goodReturnTemp: goodReturnTemp.toFixed(1)
+  };
   if (lowDelta && highReturn) {
-    return `Afkølingen er under ${minDeltaT.toFixed(1)} °C, og returtemperaturen er over ${maxReturnTemp.toFixed(1)} °C.`;
+    return translate(language, "lowDeltaHighReturn", values);
   }
   if (lowDelta) {
-    return `Afkølingen er under minimum på ${minDeltaT.toFixed(1)} °C. Returtemperaturen er acceptabel.`;
+    return translate(language, "lowDelta", values);
   }
   if (highReturn) {
-    return `Returtemperaturen er over maksimum på ${maxReturnTemp.toFixed(1)} °C. Afkølingen er acceptabel.`;
+    return translate(language, "highReturn", values);
   }
   if (severity === "excellent") {
-    return `Afkølingen er over ${goodDeltaT.toFixed(1)} °C, og returtemperaturen er under ${goodReturnTemp.toFixed(1)} °C.`;
+    return translate(language, "excellentMessage", values);
   }
   if (severity === "good") {
-    return "Afkøling og returtemperatur ligger i et sundt område.";
+    return translate(language, "goodMessage", values);
   }
   if (notGoodDelta && notGoodReturn) {
-    return `Afkøling og returtemperatur er acceptable, men ikke i det gode område endnu.`;
+    return translate(language, "notGoodBoth", values);
   }
   if (notGoodDelta) {
-    return `Afkølingen er acceptabel, men under målet på ${goodDeltaT.toFixed(1)} °C.`;
+    return translate(language, "notGoodDelta", values);
   }
   if (notGoodReturn) {
-    return `Returtemperaturen er acceptabel, men over målet på ${goodReturnTemp.toFixed(1)} °C.`;
+    return translate(language, "notGoodReturn", values);
   }
-  return "Anlægget kører inden for de valgte grænser.";
+  return translate(language, "withinLimits", values);
 }
 function flowColor(value, lowTemp, highTemp, lowColor, highColor) {
   if (value === void 0) {
@@ -868,6 +993,30 @@ const cardStyles = i$3`
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 14px;
+  }
+
+  .reading {
+    appearance: none;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .reading:disabled {
+    cursor: default;
+  }
+
+  .reading:not(:disabled):focus-visible,
+  .reading:not(:disabled):hover .value,
+  .stat-value:not(:disabled):focus-visible,
+  .stat-value:not(:disabled):hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
   .reading.return {
@@ -1257,6 +1406,7 @@ const cardStyles = i$3`
     border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
     border-radius: 24px;
     background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+    cursor: pointer;
   }
 
   .summary {
@@ -1328,10 +1478,25 @@ const cardStyles = i$3`
   }
 
   .stat-value {
+    appearance: none;
+    width: fit-content;
+    min-width: 0;
+    margin: 2px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
     margin-top: 2px;
     font-size: 15px;
     font-weight: 740;
     white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+
+  .stat-value:disabled {
+    cursor: default;
   }
 
   @keyframes waterWave {
@@ -1473,39 +1638,40 @@ let DistrictHeatingCardEditor = class extends i {
     if (!this.config) {
       return b``;
     }
+    const language = languageFromHass(this.hass);
     return b`
-      <div class="section">Temperaturer</div>
-      ${this.entityPicker("Fremløbstemperatur", "supply_temp_entity", true)}
-      ${this.entityPicker("Returtemperatur", "return_temp_entity", true)}
-      ${this.entityPicker("Delta T", "delta_t_entity")}
+      <div class="section">${translate(language, "editorTemperatures")}</div>
+      ${this.entityPicker(translate(language, "editorSupplyTemp"), "supply_temp_entity", true)}
+      ${this.entityPicker(translate(language, "editorReturnTemp"), "return_temp_entity", true)}
+      ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
-      <div class="section">Valgfrie driftstal</div>
-      ${this.entityPicker("Effekt", "power_entity")}
-      ${this.entityPicker("Energi i dag", "energy_today_entity")}
-      ${this.entityPicker("Forbrug i år", "yearly_energy_entity")}
+      <div class="section">${translate(language, "editorOptionalMetrics")}</div>
+      ${this.entityPicker(translate(language, "power"), "power_entity")}
+      ${this.entityPicker(translate(language, "editorEnergyToday"), "energy_today_entity")}
+      ${this.entityPicker(translate(language, "editorYearlyEnergy"), "yearly_energy_entity")}
 
-      <div class="section">Input til vurdering</div>
-      ${this.entityPicker("Udetemperatur", "outdoor_temp_entity")}
-      ${this.entityPicker("Indetemperatur", "indoor_temp_entity")}
-      ${this.entityPicker("Gennemsnitlig Delta T", "average_delta_t_entity")}
+      <div class="section">${translate(language, "editorAssessmentInput")}</div>
+      ${this.entityPicker(translate(language, "editorOutdoorTemp"), "outdoor_temp_entity")}
+      ${this.entityPicker(translate(language, "editorIndoorTemp"), "indoor_temp_entity")}
+      ${this.entityPicker(translate(language, "editorAverageDeltaT"), "average_delta_t_entity")}
 
-      <div class="section">Effektivitet</div>
-      ${this.numberField("Minimum Delta T", "min_delta_t")}
-      ${this.numberField("God Delta T", "good_delta_t")}
-      ${this.numberField("Maks returtemperatur", "max_return_temp")}
-      ${this.numberField("God returtemperatur", "good_return_temp")}
+      <div class="section">${translate(language, "editorEfficiency")}</div>
+      ${this.numberField(translate(language, "editorMinDeltaT"), "min_delta_t")}
+      ${this.numberField(translate(language, "editorGoodDeltaT"), "good_delta_t")}
+      ${this.numberField(translate(language, "editorMaxReturnTemp"), "max_return_temp")}
+      ${this.numberField(translate(language, "editorGoodReturnTemp"), "good_return_temp")}
 
-      <div class="section">Fremløb farveskala</div>
-      ${this.numberField("Lys farve ved °C", "supply_color_low_temp")}
-      ${this.textField("Lys farve", "supply_color_low")}
-      ${this.numberField("Mørk farve ved °C", "supply_color_high_temp")}
-      ${this.textField("Mørk farve", "supply_color_high")}
+      <div class="section">${translate(language, "editorSupplyScale")}</div>
+      ${this.numberField(translate(language, "editorLightColorAt"), "supply_color_low_temp")}
+      ${this.textField(translate(language, "editorLightColor"), "supply_color_low")}
+      ${this.numberField(translate(language, "editorDarkColorAt"), "supply_color_high_temp")}
+      ${this.textField(translate(language, "editorDarkColor"), "supply_color_high")}
 
-      <div class="section">Returløb farveskala</div>
-      ${this.numberField("Lys farve ved °C", "return_color_low_temp")}
-      ${this.textField("Lys farve", "return_color_low")}
-      ${this.numberField("Blå farve ved °C", "return_color_high_temp")}
-      ${this.textField("Blå farve", "return_color_high")}
+      <div class="section">${translate(language, "editorReturnScale")}</div>
+      ${this.numberField(translate(language, "editorLightColorAt"), "return_color_low_temp")}
+      ${this.textField(translate(language, "editorLightColor"), "return_color_low")}
+      ${this.numberField(translate(language, "editorBlueColorAt"), "return_color_high_temp")}
+      ${this.textField(translate(language, "editorBlueColor"), "return_color_high")}
     `;
   }
   entityPicker(label, key, required = false) {
@@ -1645,7 +1811,8 @@ let HaDistrictHeatingCard = class extends i {
     const indoorTemp = numericState(this.hass, this.config.indoor_temp_entity);
     const outdoorTemp = numericState(this.hass, this.config.outdoor_temp_entity);
     const assessmentConfig = this.adjustAssessmentForHeatDemand(this.config, indoorTemp, outdoorTemp);
-    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned);
+    const language = languageFromHass(this.hass);
+    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
     const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
       supply,
@@ -1670,31 +1837,31 @@ let HaDistrictHeatingCard = class extends i {
     ].join(";");
     return b`
       <ha-card style=${style}>
-        <section class="flow" aria-label="Fjernvarme flow">
+        <section class="flow" aria-label=${translate(language, "flowAria")}>
           <div class="flow-readings">
-            ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")))}
-            ${this.renderReading("Returløb", formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), true)}
+            ${this.renderReading(translate(language, "supply"), formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), this.config.supply_temp_entity)}
+            ${this.renderReading(translate(language, "return"), formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), this.config.return_temp_entity, true)}
           </div>
-          ${this.renderPlant()}
+          ${this.renderPlant(language)}
         </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass)}
-        ${this.renderStats()}
+        ${this.renderDiagnostics(result, deltaT, severityClass, language)}
+        ${this.renderStats(language)}
       </ha-card>
     `;
   }
-  renderReading(label, value, isReturn = false) {
+  renderReading(label, value, entityId, isReturn = false) {
     return b`
-      <div class=${`reading ${isReturn ? "return" : ""}`}>
+      <button class=${`reading ${isReturn ? "return" : ""}`} ?disabled=${!entityId} @click=${() => this.showMoreInfo(entityId)}>
         <div class="label">${label}</div>
         <div class="value">${value}</div>
-      </div>
+      </button>
     `;
   }
-  renderPlant() {
+  renderPlant(language = languageFromHass(this.hass)) {
     return b`
       <div class="plant">
-        <svg viewBox="0 0 760 180" role="img" aria-label="Fjernvarmerør gennem huset">
+        <svg viewBox="0 0 760 180" role="img" aria-label=${translate(language, "plantAria")}>
           <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="360" y2="94" />
           <line class="pipe-glow pipe-cold" x1="400" y1="94" x2="736" y2="94" />
           <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
@@ -1757,17 +1924,19 @@ let HaDistrictHeatingCard = class extends i {
         <span class="stat-icon">${icon}</span>
         <span class="stat-text">
           <span class="stat-label">${label}</span>
-          <span class="stat-value">${formatValue(value, labelUnit)}</span>
+          <button class="stat-value" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : void 0)}>
+            ${formatValue(value, labelUnit)}
+          </button>
         </span>
       </div>
     `;
   }
-  renderStats() {
+  renderStats(language = languageFromHass(this.hass)) {
     var _a2, _b, _c;
     const stats = [
-      ((_a2 = this.config) == null ? void 0 : _a2.power_entity) ? this.renderStat("Effekt", "power_entity", "kW", icons.flame) : null,
-      ((_b = this.config) == null ? void 0 : _b.energy_today_entity) ? this.renderStat("I dag", "energy_today_entity", "kWh", icons.drop) : null,
-      ((_c = this.config) == null ? void 0 : _c.yearly_energy_entity) ? this.renderStat("I år", "yearly_energy_entity", "MWh", icons.chart) : null
+      ((_a2 = this.config) == null ? void 0 : _a2.power_entity) ? this.renderStat(translate(language, "power"), "power_entity", "kW", icons.flame) : null,
+      ((_b = this.config) == null ? void 0 : _b.energy_today_entity) ? this.renderStat(translate(language, "today"), "energy_today_entity", "kWh", icons.drop) : null,
+      ((_c = this.config) == null ? void 0 : _c.yearly_energy_entity) ? this.renderStat(translate(language, "year"), "yearly_energy_entity", "MWh", icons.chart) : null
     ].filter(Boolean);
     if (stats.length === 0) {
       return null;
@@ -1776,15 +1945,17 @@ let HaDistrictHeatingCard = class extends i {
       <section class="stats">${stats}</section>
     `;
   }
-  renderDiagnostics(result, deltaT, severityClass) {
+  renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass)) {
+    var _a2;
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
+    const deltaEntity = (_a2 = this.config) == null ? void 0 : _a2.delta_t_entity;
     return b`
-      <section class=${`diagnostics ${severityClass}`}>
+      <section class=${`diagnostics ${severityClass}`} @click=${() => this.showMoreInfo(deltaEntity)}>
         <div class="summary">
           <span class="status-icon">${statusIcon}</span>
           <div>
             <div class="summary-title">${result.title}</div>
-            <div class="summary-text">${formatValue(deltaT, "°C")} afkøling · ${result.message}</div>
+            <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
           </div>
         </div>
       </section>
@@ -1823,6 +1994,18 @@ let HaDistrictHeatingCard = class extends i {
       default:
         return "var(--dhc-muted)";
     }
+  }
+  showMoreInfo(entityId) {
+    if (!entityId) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        detail: { entityId },
+        bubbles: true,
+        composed: true
+      })
+    );
   }
 };
 HaDistrictHeatingCard.styles = cardStyles;

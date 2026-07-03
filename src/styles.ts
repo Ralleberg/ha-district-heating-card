@@ -74,6 +74,30 @@ export const cardStyles = css`
     margin-bottom: 14px;
   }
 
+  .reading {
+    appearance: none;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .reading:disabled {
+    cursor: default;
+  }
+
+  .reading:not(:disabled):focus-visible,
+  .reading:not(:disabled):hover .value,
+  .stat-value:not(:disabled):focus-visible,
+  .stat-value:not(:disabled):hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
   .reading.return {
     text-align: right;
   }
@@ -461,6 +485,7 @@ export const cardStyles = css`
     border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
     border-radius: 24px;
     background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+    cursor: pointer;
   }
 
   .summary {
@@ -532,10 +557,25 @@ export const cardStyles = css`
   }
 
   .stat-value {
+    appearance: none;
+    width: fit-content;
+    min-width: 0;
+    margin: 2px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
     margin-top: 2px;
     font-size: 15px;
     font-weight: 740;
     white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+
+  .stat-value:disabled {
+    cursor: default;
   }
 
   @keyframes waterWave {

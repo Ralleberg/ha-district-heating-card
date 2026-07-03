@@ -10,6 +10,8 @@ A modern Home Assistant Lovelace card for district heating systems. It visualize
 - Efficiency assessment based on Delta T and return temperature.
 - Optional power, daily energy, yearly energy, indoor temperature, outdoor temperature and average Delta T sensors.
 - Visual editor for selecting entities and tuning thresholds.
+- Danish and English UI based on the Home Assistant language.
+- Clickable displayed values that open the Home Assistant entity more-info dialog.
 - Theme-aware Lit/TypeScript implementation.
 - HACS-compatible release workflow.
 

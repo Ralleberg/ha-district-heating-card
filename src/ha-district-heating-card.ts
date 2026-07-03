@@ -2,6 +2,7 @@ import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import "./editor";
 import { icons } from "./icons";
+import { languageFromHass, translate } from "./i18n";
 import { cardStyles } from "./styles";
 import {
   alphaHex,
@@ -59,7 +60,8 @@ export class HaDistrictHeatingCard extends LitElement {
     const indoorTemp = numericState(this.hass, this.config.indoor_temp_entity);
     const outdoorTemp = numericState(this.hass, this.config.outdoor_temp_entity);
     const assessmentConfig = this.adjustAssessmentForHeatDemand(this.config, indoorTemp, outdoorTemp);
-    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned);
+    const language = languageFromHass(this.hass);
+    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
     const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
       supply,
@@ -85,33 +87,33 @@ export class HaDistrictHeatingCard extends LitElement {
 
     return html`
       <ha-card style=${style}>
-        <section class="flow" aria-label="Fjernvarme flow">
+        <section class="flow" aria-label=${translate(language, "flowAria")}>
           <div class="flow-readings">
-            ${this.renderReading("Fremløb", formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")))}
-            ${this.renderReading("Returløb", formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), true)}
+            ${this.renderReading(translate(language, "supply"), formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), this.config.supply_temp_entity)}
+            ${this.renderReading(translate(language, "return"), formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), this.config.return_temp_entity, true)}
           </div>
-          ${this.renderPlant()}
+          ${this.renderPlant(language)}
         </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass)}
-        ${this.renderStats()}
+        ${this.renderDiagnostics(result, deltaT, severityClass, language)}
+        ${this.renderStats(language)}
       </ha-card>
     `;
   }
 
-  private renderReading(label: string, value: string, isReturn = false) {
+  private renderReading(label: string, value: string, entityId: string | undefined, isReturn = false) {
     return html`
-      <div class=${`reading ${isReturn ? "return" : ""}`}>
+      <button class=${`reading ${isReturn ? "return" : ""}`} ?disabled=${!entityId} @click=${() => this.showMoreInfo(entityId)}>
         <div class="label">${label}</div>
         <div class="value">${value}</div>
-      </div>
+      </button>
     `;
   }
 
-  private renderPlant() {
+  private renderPlant(language = languageFromHass(this.hass)) {
     return html`
       <div class="plant">
-        <svg viewBox="0 0 760 180" role="img" aria-label="Fjernvarmerør gennem huset">
+        <svg viewBox="0 0 760 180" role="img" aria-label=${translate(language, "plantAria")}>
           <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="360" y2="94" />
           <line class="pipe-glow pipe-cold" x1="400" y1="94" x2="736" y2="94" />
           <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
@@ -175,17 +177,19 @@ export class HaDistrictHeatingCard extends LitElement {
         <span class="stat-icon">${icon}</span>
         <span class="stat-text">
           <span class="stat-label">${label}</span>
-          <span class="stat-value">${formatValue(value, labelUnit)}</span>
+          <button class="stat-value" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : undefined)}>
+            ${formatValue(value, labelUnit)}
+          </button>
         </span>
       </div>
     `;
   }
 
-  private renderStats() {
+  private renderStats(language = languageFromHass(this.hass)) {
     const stats = [
-      this.config?.power_entity ? this.renderStat("Effekt", "power_entity", "kW", icons.flame) : null,
-      this.config?.energy_today_entity ? this.renderStat("I dag", "energy_today_entity", "kWh", icons.drop) : null,
-      this.config?.yearly_energy_entity ? this.renderStat("I år", "yearly_energy_entity", "MWh", icons.chart) : null,
+      this.config?.power_entity ? this.renderStat(translate(language, "power"), "power_entity", "kW", icons.flame) : null,
+      this.config?.energy_today_entity ? this.renderStat(translate(language, "today"), "energy_today_entity", "kWh", icons.drop) : null,
+      this.config?.yearly_energy_entity ? this.renderStat(translate(language, "year"), "yearly_energy_entity", "MWh", icons.chart) : null,
     ].filter(Boolean);
 
     if (stats.length === 0) {
@@ -197,15 +201,16 @@ export class HaDistrictHeatingCard extends LitElement {
     `;
   }
 
-  private renderDiagnostics(result: ReturnType<typeof efficiency>, deltaT: number | undefined, severityClass: string) {
+  private renderDiagnostics(result: ReturnType<typeof efficiency>, deltaT: number | undefined, severityClass: string, language = languageFromHass(this.hass)) {
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
+    const deltaEntity = this.config?.delta_t_entity;
     return html`
-      <section class=${`diagnostics ${severityClass}`}>
+      <section class=${`diagnostics ${severityClass}`} @click=${() => this.showMoreInfo(deltaEntity)}>
         <div class="summary">
           <span class="status-icon">${statusIcon}</span>
           <div>
             <div class="summary-title">${result.title}</div>
-            <div class="summary-text">${formatValue(deltaT, "°C")} afkøling · ${result.message}</div>
+            <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
           </div>
         </div>
       </section>
@@ -253,6 +258,20 @@ export class HaDistrictHeatingCard extends LitElement {
       default:
         return "var(--dhc-muted)";
     }
+  }
+
+  private showMoreInfo(entityId: string | undefined): void {
+    if (!entityId) {
+      return;
+    }
+
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        detail: { entityId },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 }
 

@@ -8,6 +8,10 @@ export interface HassEntity {
 
 export interface HomeAssistant {
   states: Record<string, HassEntity>;
+  language?: string;
+  locale?: {
+    language?: string;
+  };
   localize?: (key: string, ...args: unknown[]) => string;
 }
 
@@ -46,6 +50,7 @@ export interface LovelaceCardEditor extends HTMLElement {
 }
 
 export type Severity = "excellent" | "good" | "warning" | "critical" | "unknown";
+export type TranslationLanguage = "da" | "en";
 
 export interface EfficiencyResult {
   severity: Severity;
