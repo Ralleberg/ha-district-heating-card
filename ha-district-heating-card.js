@@ -912,18 +912,24 @@ const cardStyles = i$3`
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 42;
-    opacity: 1;
+    stroke-width: 44;
+    opacity: 0.92;
+  }
+
+  .pipe-glow {
+    stroke-linecap: round;
+    stroke-width: 56;
+    opacity: 0.32;
   }
 
   .pipe-hot {
-    stroke: url(#hotGradient);
-    filter: drop-shadow(0 0 16px var(--supply-bg));
+    stroke: var(--supply-color, #ef6f8e);
+    filter: drop-shadow(0 0 16px var(--supply-color, #ef6f8e));
   }
 
   .pipe-cold {
-    stroke: url(#coldGradient);
-    filter: drop-shadow(0 0 16px var(--return-bg));
+    stroke: var(--return-color, #6d8ed6);
+    filter: drop-shadow(0 0 16px var(--return-color, #6d8ed6));
   }
 
   .house-group {
@@ -947,7 +953,7 @@ const cardStyles = i$3`
 
   .wave {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.72);
+    stroke: rgba(255, 255, 255, 0.86);
     stroke-width: 2.2;
     stroke-linecap: round;
     stroke-dasharray: 34 24;
@@ -959,18 +965,14 @@ const cardStyles = i$3`
   }
 
   .wave-b {
-    animation: waterWave 4.8s linear infinite reverse;
+    animation: waterWave 4.8s linear infinite;
     opacity: 0.62;
   }
 
   .bubbles {
-    fill: rgba(255, 255, 255, 0.78);
+    fill: rgba(255, 255, 255, 0.9);
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.28));
     animation: bubbleDrift 4.4s linear infinite, bubblePulse 2.6s ease-in-out infinite;
-  }
-
-  .return-bubbles {
-    animation-duration: 4.9s, 2.8s;
   }
 
   .arrow {
@@ -1523,33 +1525,34 @@ let DistrictHeatingCardEditor = class extends i {
   textField(label, key) {
     var _a2;
     return b`
-      <ha-textfield
-        class="field"
-        .label=${label}
-        .value=${((_a2 = this.config) == null ? void 0 : _a2[key]) ?? ""}
-        @input=${(event) => this.updateConfig(key, this.eventValue(event))}
-        @change=${(event) => this.updateConfig(key, this.eventValue(event))}
-        @value-changed=${(event) => this.updateConfig(key, event.detail.value)}
-      ></ha-textfield>
+      <label class="native-field">
+        <span>${label}</span>
+        <input
+          type="color"
+          .value=${String(((_a2 = this.config) == null ? void 0 : _a2[key]) ?? "#ffffff")}
+          @input=${(event) => this.updateConfig(key, this.eventValue(event))}
+          @change=${(event) => this.updateConfig(key, this.eventValue(event))}
+        />
+      </label>
     `;
   }
   numberField(label, key) {
     var _a2;
     return b`
-      <ha-textfield
-        class="field"
+      <label class="native-field">
+        <span>${label}</span>
+        <input
         type="number"
         step="0.1"
-        .label=${label}
         .value=${String(((_a2 = this.config) == null ? void 0 : _a2[key]) ?? "")}
         @input=${(event) => this.updateNumberConfig(key, this.eventValue(event))}
         @change=${(event) => this.updateNumberConfig(key, this.eventValue(event))}
-        @value-changed=${(event) => this.updateNumberConfig(key, event.detail.value)}
-      ></ha-textfield>
+        />
+      </label>
     `;
   }
   eventValue(event) {
-    return String(event.currentTarget.value ?? "");
+    return String(event.target.value ?? "");
   }
   updateNumberConfig(key, rawValue) {
     const value = Number.parseFloat(String(rawValue ?? "").replace(",", "."));
@@ -1692,19 +1695,8 @@ let HaDistrictHeatingCard = class extends i {
     return b`
       <div class="plant">
         <svg viewBox="0 0 760 180" role="img" aria-label="Fjernvarmerør gennem huset">
-          <defs>
-            <linearGradient id="hotGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="var(--supply-bg)" />
-              <stop offset="52%" stop-color="var(--supply-color)" />
-              <stop offset="100%" stop-color="var(--supply-bg)" />
-            </linearGradient>
-            <linearGradient id="coldGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="var(--return-bg)" />
-              <stop offset="50%" stop-color="var(--return-color)" />
-              <stop offset="100%" stop-color="var(--return-bg)" />
-            </linearGradient>
-          </defs>
-
+          <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="360" y2="94" />
+          <line class="pipe-glow pipe-cold" x1="400" y1="94" x2="736" y2="94" />
           <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
           <line class="pipe-base pipe-cold" x1="400" y1="94" x2="736" y2="94" />
 

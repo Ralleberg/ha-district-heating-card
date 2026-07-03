@@ -116,18 +116,24 @@ export const cardStyles = css`
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 42;
-    opacity: 1;
+    stroke-width: 44;
+    opacity: 0.92;
+  }
+
+  .pipe-glow {
+    stroke-linecap: round;
+    stroke-width: 56;
+    opacity: 0.32;
   }
 
   .pipe-hot {
-    stroke: url(#hotGradient);
-    filter: drop-shadow(0 0 16px var(--supply-bg));
+    stroke: var(--supply-color, #ef6f8e);
+    filter: drop-shadow(0 0 16px var(--supply-color, #ef6f8e));
   }
 
   .pipe-cold {
-    stroke: url(#coldGradient);
-    filter: drop-shadow(0 0 16px var(--return-bg));
+    stroke: var(--return-color, #6d8ed6);
+    filter: drop-shadow(0 0 16px var(--return-color, #6d8ed6));
   }
 
   .house-group {
@@ -151,7 +157,7 @@ export const cardStyles = css`
 
   .wave {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.72);
+    stroke: rgba(255, 255, 255, 0.86);
     stroke-width: 2.2;
     stroke-linecap: round;
     stroke-dasharray: 34 24;
@@ -163,18 +169,14 @@ export const cardStyles = css`
   }
 
   .wave-b {
-    animation: waterWave 4.8s linear infinite reverse;
+    animation: waterWave 4.8s linear infinite;
     opacity: 0.62;
   }
 
   .bubbles {
-    fill: rgba(255, 255, 255, 0.78);
+    fill: rgba(255, 255, 255, 0.9);
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.28));
     animation: bubbleDrift 4.4s linear infinite, bubblePulse 2.6s ease-in-out infinite;
-  }
-
-  .return-bubbles {
-    animation-duration: 4.9s, 2.8s;
   }
 
   .arrow {

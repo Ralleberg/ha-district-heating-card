@@ -77,34 +77,35 @@ export class DistrictHeatingCardEditor extends LitElement {
 
   private textField(label: string, key: ConfigKey) {
     return html`
-      <ha-textfield
-        class="field"
-        .label=${label}
-        .value=${this.config?.[key] ?? ""}
-        @input=${(event: InputEvent) => this.updateConfig(key, this.eventValue(event))}
-        @change=${(event: Event) => this.updateConfig(key, this.eventValue(event))}
-        @value-changed=${(event: CustomEvent) => this.updateConfig(key, event.detail.value)}
-      ></ha-textfield>
+      <label class="native-field">
+        <span>${label}</span>
+        <input
+          type="color"
+          .value=${String(this.config?.[key] ?? "#ffffff")}
+          @input=${(event: InputEvent) => this.updateConfig(key, this.eventValue(event))}
+          @change=${(event: Event) => this.updateConfig(key, this.eventValue(event))}
+        />
+      </label>
     `;
   }
 
   private numberField(label: string, key: ConfigKey) {
     return html`
-      <ha-textfield
-        class="field"
+      <label class="native-field">
+        <span>${label}</span>
+        <input
         type="number"
         step="0.1"
-        .label=${label}
         .value=${String(this.config?.[key] ?? "")}
         @input=${(event: InputEvent) => this.updateNumberConfig(key, this.eventValue(event))}
         @change=${(event: Event) => this.updateNumberConfig(key, this.eventValue(event))}
-        @value-changed=${(event: CustomEvent) => this.updateNumberConfig(key, event.detail.value)}
-      ></ha-textfield>
+        />
+      </label>
     `;
   }
 
   private eventValue(event: Event): string {
-    return String((event.currentTarget as HTMLInputElement).value ?? "");
+    return String((event.target as HTMLInputElement).value ?? "");
   }
 
   private updateNumberConfig(key: ConfigKey, rawValue: unknown): void {

@@ -112,19 +112,8 @@ export class HaDistrictHeatingCard extends LitElement {
     return html`
       <div class="plant">
         <svg viewBox="0 0 760 180" role="img" aria-label="Fjernvarmerør gennem huset">
-          <defs>
-            <linearGradient id="hotGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="var(--supply-bg)" />
-              <stop offset="52%" stop-color="var(--supply-color)" />
-              <stop offset="100%" stop-color="var(--supply-bg)" />
-            </linearGradient>
-            <linearGradient id="coldGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="var(--return-bg)" />
-              <stop offset="50%" stop-color="var(--return-color)" />
-              <stop offset="100%" stop-color="var(--return-bg)" />
-            </linearGradient>
-          </defs>
-
+          <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="360" y2="94" />
+          <line class="pipe-glow pipe-cold" x1="400" y1="94" x2="736" y2="94" />
           <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
           <line class="pipe-base pipe-cold" x1="400" y1="94" x2="736" y2="94" />
 
