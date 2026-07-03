@@ -146,15 +146,29 @@ export class HaDistrictHeatingCard extends LitElement {
             </g>
           </g>
 
-          <g opacity="0.9">
-            <line class="pipe-line" x1="44" y1="82" x2="338" y2="82" stroke-dasharray="34 38" />
-            <line class="pipe-line" x1="44" y1="106" x2="338" y2="106" stroke-dasharray="12 28 42 34" />
-            <line class="spark" x1="48" y1="94" x2="344" y2="94" />
+          <g class="water-flow">
+            <path class="wave supply-wave wave-a" d="M42 89 C64 76 84 112 106 98 S150 76 172 94 S216 111 238 93 S282 77 304 95 S330 105 352 92" />
+            <path class="wave supply-wave wave-b" d="M38 101 C62 112 82 78 106 91 S150 112 174 92 S218 78 242 95 S286 111 344 92" />
+            <g class="bubbles supply-bubbles">
+              <circle cx="68" cy="89" r="3.2" />
+              <circle cx="108" cy="102" r="2.3" />
+              <circle cx="151" cy="86" r="2.7" />
+              <circle cx="204" cy="101" r="3" />
+              <circle cx="253" cy="88" r="2.2" />
+              <circle cx="306" cy="101" r="2.8" />
+            </g>
             <polygon class="arrow supply-arrow" points="282,72 320,94 282,116" />
 
-            <line class="pipe-line" x1="416" y1="82" x2="716" y2="82" stroke-dasharray="34 38" />
-            <line class="pipe-line" x1="416" y1="106" x2="716" y2="106" stroke-dasharray="12 28 42 34" />
-            <line class="spark" x1="416" y1="94" x2="712" y2="94" />
+            <path class="wave return-wave wave-a" d="M410 89 C434 76 454 112 478 98 S522 76 546 94 S590 111 614 93 S658 77 680 95 S704 105 724 92" />
+            <path class="wave return-wave wave-b" d="M410 101 C434 112 454 78 478 91 S522 112 546 92 S590 78 614 95 S658 111 724 92" />
+            <g class="bubbles return-bubbles">
+              <circle cx="440" cy="101" r="2.8" />
+              <circle cx="489" cy="87" r="2.2" />
+              <circle cx="532" cy="102" r="3.1" />
+              <circle cx="586" cy="88" r="2.6" />
+              <circle cx="637" cy="101" r="2.4" />
+              <circle cx="694" cy="88" r="3" />
+            </g>
             <polygon class="arrow return-arrow" points="626,72 664,94 626,116" />
           </g>
         </svg>

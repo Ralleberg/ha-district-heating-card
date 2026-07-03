@@ -145,20 +145,36 @@ export const cardStyles = css`
     color: color-mix(in srgb, var(--dhc-muted) 82%, white);
   }
 
-  .pipe-line,
-  .spark {
-    stroke: rgba(255, 255, 255, 0.78);
+  .water-flow {
+    opacity: 0.92;
+  }
+
+  .wave {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.72);
+    stroke-width: 2.2;
     stroke-linecap: round;
-    animation: drift 3.8s linear infinite;
+    stroke-dasharray: 34 24;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.22));
   }
 
-  .pipe-line {
-    stroke-width: 2;
+  .wave-a {
+    animation: waterWave 3.6s linear infinite;
   }
 
-  .spark {
-    stroke-width: 4;
-    stroke-dasharray: 0.1 27;
+  .wave-b {
+    animation: waterWave 4.8s linear infinite reverse;
+    opacity: 0.62;
+  }
+
+  .bubbles {
+    fill: rgba(255, 255, 255, 0.78);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.28));
+    animation: bubbleDrift 4.4s linear infinite, bubblePulse 2.6s ease-in-out infinite;
+  }
+
+  .return-bubbles {
+    animation-duration: 4.9s, 2.8s;
   }
 
   .arrow {
@@ -520,12 +536,31 @@ export const cardStyles = css`
     white-space: nowrap;
   }
 
-  @keyframes drift {
+  @keyframes waterWave {
     from {
       stroke-dashoffset: 0;
     }
     to {
-      stroke-dashoffset: -96;
+      stroke-dashoffset: -116;
+    }
+  }
+
+  @keyframes bubbleDrift {
+    0% {
+      transform: translateX(-12px);
+    }
+    100% {
+      transform: translateX(28px);
+    }
+  }
+
+  @keyframes bubblePulse {
+    0%,
+    100% {
+      opacity: 0.52;
+    }
+    50% {
+      opacity: 0.95;
     }
   }
 
