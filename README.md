@@ -95,5 +95,5 @@ npm run build
 The built Home Assistant module is written to:
 
 ```text
-dist/ha-district-heating-card.js
+ha-district-heating-card.js
 ```

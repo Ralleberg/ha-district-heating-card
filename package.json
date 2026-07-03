@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "description": "A modern Home Assistant Lovelace card for district heating systems.",
   "type": "module",
-  "main": "dist/ha-district-heating-card.js",
+  "main": "ha-district-heating-card.js",
   "files": [
-    "dist",
+    "ha-district-heating-card.js",
     "hacs.json",
     "README.md",
     "LICENSE"
