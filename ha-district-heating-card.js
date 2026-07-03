@@ -912,18 +912,18 @@ const cardStyles = i$3`
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 32;
-    opacity: 0.88;
+    stroke-width: 42;
+    opacity: 1;
   }
 
   .pipe-hot {
     stroke: url(#hotGradient);
-    filter: drop-shadow(0 0 12px rgba(239, 111, 142, 0.42));
+    filter: drop-shadow(0 0 16px var(--supply-bg));
   }
 
   .pipe-cold {
     stroke: url(#coldGradient);
-    filter: drop-shadow(0 0 12px rgba(109, 142, 214, 0.42));
+    filter: drop-shadow(0 0 16px var(--return-bg));
   }
 
   .house-group {
@@ -943,7 +943,7 @@ const cardStyles = i$3`
 
   .pipe-line,
   .spark {
-    stroke: rgba(255, 255, 255, 0.72);
+    stroke: rgba(255, 255, 255, 0.78);
     stroke-linecap: round;
     animation: drift 3.8s linear infinite;
   }
@@ -964,8 +964,7 @@ const cardStyles = i$3`
   }
 
   .return-arrow {
-    transform-origin: 108px 147px;
-    animation-name: pulseBack;
+    transform-origin: 645px 94px;
   }
 
   .metrics {
@@ -1657,7 +1656,7 @@ let HaDistrictHeatingCard = class extends i {
   renderPlant() {
     return b`
       <div class="plant">
-        <svg viewBox="0 0 760 210" role="img" aria-label="Fjernvarmerør gennem huset">
+        <svg viewBox="0 0 760 180" role="img" aria-label="Fjernvarmerør gennem huset">
           <defs>
             <linearGradient id="hotGradient" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stop-color="var(--supply-bg)" />
@@ -1671,37 +1670,37 @@ let HaDistrictHeatingCard = class extends i {
             </linearGradient>
           </defs>
 
-          <line class="pipe-base pipe-hot" x1="22" y1="64" x2="738" y2="64" />
-          <line class="pipe-base pipe-cold" x1="22" y1="147" x2="738" y2="147" />
+          <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
+          <line class="pipe-base pipe-cold" x1="400" y1="94" x2="736" y2="94" />
 
           <g class="house-group">
-            <path class="house" d="M331 90V54h-32c-9 0-13-12-6-17l88-31a20 20 0 0 1 22 0l88 31c7 5 3 17-6 17h-32v103c0 11-9 20-20 20h-82c-11 0-20-9-20-20V90Z" />
+            <path class="house" d="M331 78V45h-32c-9 0-13-12-6-17l88-31a20 20 0 0 1 22 0l88 31c7 5 3 17-6 17h-32v103c0 11-9 20-20 20h-82c-11 0-20-9-20-20V78Z" />
 
             <g class="radiator" fill="currentColor" opacity="0.84">
-              <rect x="350" y="110" width="13" height="55" rx="7" />
-              <rect x="375" y="110" width="13" height="55" rx="7" />
-              <rect x="400" y="110" width="13" height="55" rx="7" />
-              <rect x="425" y="114" width="8" height="47" rx="4" />
-              <rect x="344" y="126" width="96" height="8" rx="4" />
+              <rect x="350" y="98" width="13" height="55" rx="7" />
+              <rect x="375" y="98" width="13" height="55" rx="7" />
+              <rect x="400" y="98" width="13" height="55" rx="7" />
+              <rect x="425" y="102" width="8" height="47" rx="4" />
+              <rect x="344" y="114" width="96" height="8" rx="4" />
             </g>
 
             <g class="heat-wave" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity="0.86">
-              <path d="M365 91c-13-16 13-21 0-37" />
-              <path d="M392 91c-13-16 13-21 0-37" />
-              <path d="M419 91c-13-16 13-21 0-37" />
+              <path d="M365 82c-13-16 13-21 0-37" />
+              <path d="M392 82c-13-16 13-21 0-37" />
+              <path d="M419 82c-13-16 13-21 0-37" />
             </g>
           </g>
 
           <g opacity="0.9">
-            <line class="pipe-line hot-line" x1="52" y1="45" x2="728" y2="45" stroke-dasharray="42 48" />
-            <line class="pipe-line hot-line" x1="30" y1="76" x2="704" y2="76" stroke-dasharray="12 34 52 42" />
-            <line class="spark hot-line" x1="44" y1="64" x2="716" y2="64" />
-            <polygon class="arrow supply-arrow" points="632,42 671,64 632,86" />
+            <line class="pipe-line" x1="44" y1="82" x2="338" y2="82" stroke-dasharray="34 38" />
+            <line class="pipe-line" x1="44" y1="106" x2="338" y2="106" stroke-dasharray="12 28 42 34" />
+            <line class="spark" x1="48" y1="94" x2="344" y2="94" />
+            <polygon class="arrow supply-arrow" points="282,72 320,94 282,116" />
 
-            <line class="pipe-line cold-line" x1="32" y1="128" x2="710" y2="128" stroke-dasharray="42 48" />
-            <line class="pipe-line cold-line" x1="54" y1="159" x2="730" y2="159" stroke-dasharray="12 34 52 42" />
-            <line class="spark cold-line" x1="44" y1="147" x2="716" y2="147" />
-            <polygon class="arrow return-arrow" points="128,125 89,147 128,169" />
+            <line class="pipe-line" x1="416" y1="82" x2="716" y2="82" stroke-dasharray="34 38" />
+            <line class="pipe-line" x1="416" y1="106" x2="716" y2="106" stroke-dasharray="12 28 42 34" />
+            <line class="spark" x1="416" y1="94" x2="712" y2="94" />
+            <polygon class="arrow return-arrow" points="626,72 664,94 626,116" />
           </g>
         </svg>
       </div>

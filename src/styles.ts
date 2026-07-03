@@ -116,18 +116,18 @@ export const cardStyles = css`
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 32;
-    opacity: 0.88;
+    stroke-width: 42;
+    opacity: 1;
   }
 
   .pipe-hot {
     stroke: url(#hotGradient);
-    filter: drop-shadow(0 0 12px rgba(239, 111, 142, 0.42));
+    filter: drop-shadow(0 0 16px var(--supply-bg));
   }
 
   .pipe-cold {
     stroke: url(#coldGradient);
-    filter: drop-shadow(0 0 12px rgba(109, 142, 214, 0.42));
+    filter: drop-shadow(0 0 16px var(--return-bg));
   }
 
   .house-group {
@@ -147,7 +147,7 @@ export const cardStyles = css`
 
   .pipe-line,
   .spark {
-    stroke: rgba(255, 255, 255, 0.72);
+    stroke: rgba(255, 255, 255, 0.78);
     stroke-linecap: round;
     animation: drift 3.8s linear infinite;
   }
@@ -168,8 +168,7 @@ export const cardStyles = css`
   }
 
   .return-arrow {
-    transform-origin: 108px 147px;
-    animation-name: pulseBack;
+    transform-origin: 645px 94px;
   }
 
   .metrics {
