@@ -1,0 +1,35 @@
+{
+  "name": "ha-district-heating-card",
+  "version": "0.1.0",
+  "description": "A modern Home Assistant Lovelace card for district heating systems.",
+  "type": "module",
+  "main": "dist/ha-district-heating-card.js",
+  "files": [
+    "dist",
+    "hacs.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "vite --host 0.0.0.0",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "custom-card",
+    "hacs",
+    "district-heating"
+  ],
+  "author": "Rasmus Holt",
+  "license": "MIT",
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
+  }
+}
