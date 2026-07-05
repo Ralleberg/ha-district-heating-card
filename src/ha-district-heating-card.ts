@@ -91,16 +91,18 @@ export class HaDistrictHeatingCard extends LitElement {
 
     return html`
       <ha-card style=${style}>
-        <section class="flow" aria-label=${translate(language, "flowAria")}>
-          <div class="flow-readings">
-            ${this.renderReading(translate(language, "supply"), formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), this.config.supply_temp_entity)}
-            ${this.renderReading(translate(language, "return"), formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), this.config.return_temp_entity, true)}
-          </div>
-          ${this.renderPlant(language)}
-        </section>
+        <div class="card">
+          <section class="flow" aria-label=${translate(language, "flowAria")}>
+            <div class="flow-readings">
+              ${this.renderReading(translate(language, "supply"), formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), this.config.supply_temp_entity)}
+              ${this.renderReading(translate(language, "return"), formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), this.config.return_temp_entity, true)}
+            </div>
+            ${this.renderPlant(language)}
+          </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
-        ${this.renderStats(language)}
+          ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
+          ${this.renderStats(language)}
+        </div>
       </ha-card>
     `;
   }

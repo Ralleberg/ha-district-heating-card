@@ -929,8 +929,9 @@ const cardStyles = i$3`
   :host {
     display: block;
     color: var(--primary-text-color, #f4f7fb);
-    --dhc-card-bg: color-mix(in srgb, var(--card-background-color, #171925) 82%, transparent);
-    --dhc-panel-bg: color-mix(in srgb, var(--card-background-color, #171925) 68%, transparent);
+    --dhc-background: var(--dhc-card-background, var(--ha-card-background, var(--card-background-color, var(--paper-card-background-color, var(--primary-background-color, #171925)))));
+    --dhc-card-bg: color-mix(in srgb, var(--dhc-background) 82%, transparent);
+    --dhc-panel-bg: color-mix(in srgb, var(--dhc-background) 68%, transparent);
     --dhc-border: color-mix(in srgb, var(--divider-color, #738099) 40%, transparent);
     --dhc-muted: var(--secondary-text-color, #aeb7c8);
     --dhc-red: #ef6f8e;
@@ -938,24 +939,17 @@ const cardStyles = i$3`
     --dhc-blue: #6d8ed6;
     --dhc-green: var(--success-color, #54c76d);
     --dhc-yellow: var(--warning-color, #f4bf45);
-    --dhc-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
-    --dhc-radius: var(--ha-card-border-radius, 24px);
     font-family: var(--primary-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   }
 
   ha-card {
-    position: relative;
     overflow: hidden;
+    position: relative;
+  }
+
+  .card {
     padding: clamp(14px, 2.4vw, 22px);
-    border-radius: var(--dhc-radius);
-    border: 1px solid var(--dhc-border);
-    background:
-      radial-gradient(circle at 18% 22%, rgba(239, 111, 142, 0.14), transparent 36%),
-      radial-gradient(circle at 88% 28%, rgba(109, 142, 214, 0.18), transparent 38%),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 32%),
-      var(--dhc-card-bg);
-    box-shadow: var(--dhc-shadow);
-    backdrop-filter: blur(22px) saturate(1.2);
+    color: inherit;
   }
 
   .header,
@@ -1571,9 +1565,8 @@ const cardStyles = i$3`
   }
 
   @media (max-width: 760px) {
-    ha-card {
+    .card {
       padding: 14px;
-      border-radius: 20px;
     }
 
     .flow-readings {
@@ -1876,16 +1869,18 @@ let HaDistrictHeatingCard = class extends i {
     ].join(";");
     return b`
       <ha-card style=${style}>
-        <section class="flow" aria-label=${translate(language, "flowAria")}>
-          <div class="flow-readings">
-            ${this.renderReading(translate(language, "supply"), formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), this.config.supply_temp_entity)}
-            ${this.renderReading(translate(language, "return"), formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), this.config.return_temp_entity, true)}
-          </div>
-          ${this.renderPlant(language)}
-        </section>
+        <div class="card">
+          <section class="flow" aria-label=${translate(language, "flowAria")}>
+            <div class="flow-readings">
+              ${this.renderReading(translate(language, "supply"), formatValue(supply, unit(this.hass, this.config.supply_temp_entity, "°C")), this.config.supply_temp_entity)}
+              ${this.renderReading(translate(language, "return"), formatValue(returned, unit(this.hass, this.config.return_temp_entity, "°C")), this.config.return_temp_entity, true)}
+            </div>
+            ${this.renderPlant(language)}
+          </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
-        ${this.renderStats(language)}
+          ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
+          ${this.renderStats(language)}
+        </div>
       </ha-card>
     `;
   }
