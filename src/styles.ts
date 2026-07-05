@@ -516,6 +516,13 @@ export const cardStyles = css`
     line-height: 1.32;
   }
 
+  .summary-note {
+    margin-top: 6px;
+    color: color-mix(in srgb, var(--severity-color) 82%, white);
+    font-size: clamp(11px, 3vw, 13px);
+    line-height: 1.28;
+  }
+
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));

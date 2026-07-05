@@ -625,6 +625,10 @@ const translations = {
     notGoodDelta: "Afkølingen er acceptabel, men under målet på {goodDeltaT} °C.",
     notGoodReturn: "Returtemperaturen er acceptabel, men over målet på {goodReturnTemp} °C.",
     withinLimits: "Anlægget kører inden for de valgte grænser.",
+    seasonalContext: "Vurderet med 24 timers inde/ude-gennemsnit og årstid.",
+    seasonalLowLoad: "Acceptabelt for årstiden og den lave varmebelastning.",
+    seasonalModerateLoad: "Kravet er justeret efter årstid og udetemperatur.",
+    seasonalHighLoad: "Koldt vejr giver et skærpet krav til returtemperaturen.",
     veryGood: "Meget god",
     good: "God",
     low: "Lav",
@@ -676,6 +680,10 @@ const translations = {
     notGoodDelta: "Cooling is acceptable, but below the target of {goodDeltaT} °C.",
     notGoodReturn: "Return temperature is acceptable, but above the target of {goodReturnTemp} °C.",
     withinLimits: "The system is operating within the configured limits.",
+    seasonalContext: "Assessed using 24-hour indoor/outdoor averages and season.",
+    seasonalLowLoad: "Acceptable for the season and low heating load.",
+    seasonalModerateLoad: "The target is adjusted for season and outdoor temperature.",
+    seasonalHighLoad: "Cold weather makes the return temperature requirement stricter.",
     veryGood: "Very good",
     good: "Good",
     low: "Low",
@@ -1431,6 +1439,13 @@ const cardStyles = i$3`
     line-height: 1.32;
   }
 
+  .summary-note {
+    margin-top: 6px;
+    color: color-mix(in srgb, var(--severity-color) 82%, white);
+    font-size: clamp(11px, 3vw, 13px);
+    line-height: 1.28;
+  }
+
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
@@ -1795,6 +1810,10 @@ var __decorateClass = (decorators, target, key, kind) => {
 };
 const CARD_VERSION = "0.1.0";
 let HaDistrictHeatingCard = class extends i {
+  constructor() {
+    super(...arguments);
+    this.historyAverages = {};
+  }
   static getConfigElement() {
     return document.createElement("district-heating-card-editor");
   }
@@ -1822,10 +1841,11 @@ let HaDistrictHeatingCard = class extends i {
     const returned = numericState(this.hass, this.config.return_temp_entity);
     const deltaT = computeDeltaT(this.hass, this.config);
     const averageDeltaT = numericState(this.hass, this.config.average_delta_t_entity);
-    const indoorTemp = numericState(this.hass, this.config.indoor_temp_entity);
-    const outdoorTemp = numericState(this.hass, this.config.outdoor_temp_entity);
-    const assessmentConfig = this.adjustAssessmentForHeatDemand(this.config, indoorTemp, outdoorTemp);
     const language = languageFromHass(this.hass);
+    const indoorTemp = this.historyAverages.indoor ?? numericState(this.hass, this.config.indoor_temp_entity);
+    const outdoorTemp = this.historyAverages.outdoor ?? numericState(this.hass, this.config.outdoor_temp_entity);
+    const assessment = this.adjustAssessmentForContext(this.config, indoorTemp, outdoorTemp);
+    const assessmentConfig = assessment.config;
     const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
     const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
@@ -1859,10 +1879,13 @@ let HaDistrictHeatingCard = class extends i {
           ${this.renderPlant(language)}
         </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass, language)}
+        ${this.renderDiagnostics(result, deltaT, severityClass, language, assessment.noteKey)}
         ${this.renderStats(language)}
       </ha-card>
     `;
+  }
+  updated() {
+    this.fetchHistoryAverages();
   }
   renderReading(label, value, entityId, isReturn = false) {
     return b`
@@ -1959,7 +1982,7 @@ let HaDistrictHeatingCard = class extends i {
       <section class="stats">${stats}</section>
     `;
   }
-  renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass)) {
+  renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass), noteKey) {
     var _a2;
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
     const deltaEntity = (_a2 = this.config) == null ? void 0 : _a2.delta_t_entity;
@@ -1970,31 +1993,127 @@ let HaDistrictHeatingCard = class extends i {
           <div>
             <div class="summary-title">${result.title}</div>
             <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
+            ${noteKey ? b`<div class="summary-note">${translate(language, noteKey)}</div>` : null}
           </div>
         </div>
       </section>
     `;
   }
-  adjustAssessmentForHeatDemand(config, indoorTemp, outdoorTemp) {
+  adjustAssessmentForContext(config, indoorTemp, outdoorTemp) {
     if (indoorTemp === void 0 || outdoorTemp === void 0) {
-      return config;
+      return { config };
     }
     const heatDemand = indoorTemp - outdoorTemp;
-    if (heatDemand < 8) {
+    const seasonFactor = this.seasonalDemandFactor(outdoorTemp, heatDemand);
+    const baseMinDeltaT = config.min_delta_t ?? 20;
+    const baseGoodDeltaT = config.good_delta_t ?? 30;
+    const nextConfig = {
+      ...config,
+      min_delta_t: Math.max(8, baseMinDeltaT * seasonFactor),
+      good_delta_t: Math.max(12, baseGoodDeltaT * seasonFactor)
+    };
+    if (heatDemand > 22 || seasonFactor >= 0.95) {
       return {
-        ...config,
-        min_delta_t: (config.min_delta_t ?? 20) * 0.8,
-        good_delta_t: (config.good_delta_t ?? 30) * 0.85
+        config: {
+          ...nextConfig,
+          max_return_temp: (config.max_return_temp ?? 45) - 3,
+          good_return_temp: (config.good_return_temp ?? 35) - 2
+        },
+        noteKey: "seasonalHighLoad"
       };
     }
-    if (heatDemand > 22) {
-      return {
-        ...config,
-        max_return_temp: (config.max_return_temp ?? 45) - 3,
-        good_return_temp: (config.good_return_temp ?? 35) - 2
-      };
+    if (seasonFactor <= 0.68) {
+      return { config: nextConfig, noteKey: "seasonalLowLoad" };
     }
-    return config;
+    if (seasonFactor < 0.9) {
+      return { config: nextConfig, noteKey: "seasonalModerateLoad" };
+    }
+    return { config: nextConfig };
+  }
+  seasonalDemandFactor(outdoorTemp, heatDemand) {
+    const month = (/* @__PURE__ */ new Date()).getMonth();
+    const isSummer = month >= 4 && month <= 8;
+    const isShoulder = month === 2 || month === 3 || month === 9 || month === 10;
+    let factor = isSummer ? 0.62 : isShoulder ? 0.78 : 1;
+    if (outdoorTemp >= 17 || heatDemand < 6) {
+      factor = Math.min(factor, 0.58);
+    } else if (outdoorTemp >= 12 || heatDemand < 10) {
+      factor = Math.min(factor, 0.68);
+    } else if (outdoorTemp >= 7 || heatDemand < 14) {
+      factor = Math.min(factor, 0.82);
+    }
+    if (outdoorTemp <= 0 || heatDemand > 22) {
+      factor = Math.max(factor, 1);
+    }
+    return factor;
+  }
+  async fetchHistoryAverages() {
+    var _a2;
+    if (!((_a2 = this.hass) == null ? void 0 : _a2.callWS) || !this.config) {
+      return;
+    }
+    const entityIds = [this.config.indoor_temp_entity, this.config.outdoor_temp_entity].filter(Boolean);
+    if (entityIds.length === 0) {
+      return;
+    }
+    const bucket = Math.floor(Date.now() / (30 * 60 * 1e3));
+    const nextKey = `${entityIds.join("|")}:${bucket}`;
+    if (this.historyKey === nextKey) {
+      return;
+    }
+    this.historyKey = nextKey;
+    const endTime = /* @__PURE__ */ new Date();
+    const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1e3);
+    try {
+      const history = await this.hass.callWS({
+        type: "history/history_during_period",
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        entity_ids: entityIds,
+        minimal_response: true,
+        no_attributes: true
+      });
+      this.historyAverages = {
+        indoor: this.averageHistory(history, this.config.indoor_temp_entity, startTime, endTime),
+        outdoor: this.averageHistory(history, this.config.outdoor_temp_entity, startTime, endTime)
+      };
+    } catch (_error) {
+      this.historyAverages = {};
+    }
+  }
+  averageHistory(history, entityId, startTime, endTime) {
+    if (!entityId) {
+      return void 0;
+    }
+    const points = (history[entityId] ?? []).map((point) => ({
+      value: Number.parseFloat(String(point.s ?? point.state ?? "").replace(",", ".")),
+      time: this.historyPointTime(point)
+    })).filter((point) => Number.isFinite(point.value) && point.time !== void 0).sort((left, right) => (left.time ?? 0) - (right.time ?? 0));
+    if (points.length === 0) {
+      return numericState(this.hass, entityId);
+    }
+    const sampleInterval = 30 * 60 * 1e3;
+    const samples = [];
+    let cursor = 0;
+    for (let sampleTime = startTime.getTime(); sampleTime <= endTime.getTime(); sampleTime += sampleInterval) {
+      while (cursor < points.length - 1 && points[cursor + 1].time <= sampleTime) {
+        cursor += 1;
+      }
+      const sample = points[cursor].time <= sampleTime ? points[cursor] : points[0];
+      samples.push(sample.value);
+    }
+    return samples.reduce((sum, value) => sum + value, 0) / samples.length;
+  }
+  historyPointTime(point) {
+    if (typeof point.lu === "number") {
+      return point.lu > 1e12 ? point.lu : point.lu * 1e3;
+    }
+    const timestamp = point.last_updated ?? point.last_changed;
+    if (!timestamp) {
+      return void 0;
+    }
+    const parsed = new Date(timestamp).getTime();
+    return Number.isFinite(parsed) ? parsed : void 0;
   }
   severityColor(severity) {
     switch (severity) {
@@ -2029,6 +2148,9 @@ __decorateClass([
 __decorateClass([
   r()
 ], HaDistrictHeatingCard.prototype, "config", 2);
+__decorateClass([
+  r()
+], HaDistrictHeatingCard.prototype, "historyAverages", 2);
 HaDistrictHeatingCard = __decorateClass([
   t("ha-district-heating-card")
 ], HaDistrictHeatingCard);

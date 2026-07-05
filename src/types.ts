@@ -13,6 +13,7 @@ export interface HomeAssistant {
     language?: string;
   };
   localize?: (key: string, ...args: unknown[]) => string;
+  callWS?: <T = unknown>(message: Record<string, unknown>) => Promise<T>;
 }
 
 export interface DistrictHeatingCardConfig {
@@ -60,4 +61,13 @@ export interface EfficiencyResult {
   returnLabel: string;
   deltaScore: number;
   returnScore: number;
+}
+
+export interface HistoryPoint {
+  s?: string;
+  state?: string;
+  lu?: number;
+  lc?: number;
+  last_updated?: string;
+  last_changed?: string;
 }
