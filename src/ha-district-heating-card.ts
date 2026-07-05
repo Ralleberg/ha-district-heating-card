@@ -25,6 +25,7 @@ export class HaDistrictHeatingCard extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private config?: DistrictHeatingCardConfig;
   @state() private historyAverages: { indoor?: number; outdoor?: number } = {};
+  @state() private historyEndTime?: number;
   private historyKey?: string;
 
   public static getConfigElement(): LovelaceCardEditor {
@@ -98,7 +99,7 @@ export class HaDistrictHeatingCard extends LitElement {
           ${this.renderPlant(language)}
         </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass, language, assessment.noteKey)}
+        ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
         ${this.renderStats(language)}
       </ha-card>
     `;
@@ -213,7 +214,7 @@ export class HaDistrictHeatingCard extends LitElement {
     deltaT: number | undefined,
     severityClass: string,
     language = languageFromHass(this.hass),
-    noteKey?: "seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad",
+    noteKeys: Array<"seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | "delayedMeterData"> = [],
   ) {
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
     const deltaEntity = this.config?.delta_t_entity;
@@ -224,7 +225,7 @@ export class HaDistrictHeatingCard extends LitElement {
           <div>
             <div class="summary-title">${result.title}</div>
             <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
-            ${noteKey ? html`<div class="summary-note">${translate(language, noteKey)}</div>` : null}
+            ${noteKeys.map((noteKey) => html`<div class="summary-note">${translate(language, noteKey)}</div>`)}
           </div>
         </div>
       </section>
@@ -297,6 +298,21 @@ export class HaDistrictHeatingCard extends LitElement {
     return factor;
   }
 
+  private diagnosticNotes(
+    seasonNote: "seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | undefined,
+  ): Array<"seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | "delayedMeterData"> {
+    const notes: Array<"seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | "delayedMeterData"> = [];
+    if (seasonNote) {
+      notes.push(seasonNote);
+    }
+
+    if (this.historyEndTime && Date.now() - this.historyEndTime > 18 * 60 * 60 * 1000) {
+      notes.push("delayedMeterData");
+    }
+
+    return notes;
+  }
+
   private async fetchHistoryAverages(): Promise<void> {
     if (!this.hass?.callWS || !this.config) {
       return;
@@ -307,14 +323,14 @@ export class HaDistrictHeatingCard extends LitElement {
       return;
     }
 
-    const bucket = Math.floor(Date.now() / (30 * 60 * 1000));
+    const endTime = this.districtHeatingDataTime();
+    const bucket = Math.floor(endTime.getTime() / (30 * 60 * 1000));
     const nextKey = `${entityIds.join("|")}:${bucket}`;
     if (this.historyKey === nextKey) {
       return;
     }
     this.historyKey = nextKey;
 
-    const endTime = new Date();
     const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
 
     try {
@@ -331,9 +347,29 @@ export class HaDistrictHeatingCard extends LitElement {
         indoor: this.averageHistory(history, this.config.indoor_temp_entity, startTime, endTime),
         outdoor: this.averageHistory(history, this.config.outdoor_temp_entity, startTime, endTime),
       };
+      this.historyEndTime = endTime.getTime();
     } catch (_error) {
       this.historyAverages = {};
+      this.historyEndTime = undefined;
     }
+  }
+
+  private districtHeatingDataTime(): Date {
+    const timestamps = [
+      this.config?.supply_temp_entity,
+      this.config?.return_temp_entity,
+      this.config?.delta_t_entity,
+    ]
+      .map((entityId) => (entityId ? this.hass?.states[entityId]?.last_updated : undefined))
+      .filter(Boolean)
+      .map((timestamp) => new Date(timestamp as string).getTime())
+      .filter((timestamp) => Number.isFinite(timestamp));
+
+    if (timestamps.length === 0) {
+      return new Date();
+    }
+
+    return new Date(Math.max(...timestamps));
   }
 
   private averageHistory(

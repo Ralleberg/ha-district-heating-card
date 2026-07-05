@@ -629,6 +629,7 @@ const translations = {
     seasonalLowLoad: "Acceptabelt for årstiden og den lave varmebelastning.",
     seasonalModerateLoad: "Kravet er justeret efter årstid og udetemperatur.",
     seasonalHighLoad: "Koldt vejr giver et skærpet krav til returtemperaturen.",
+    delayedMeterData: "Vurderet som døgnmåling ud fra lufttemperaturen i døgnet op til fjernvarmedataens seneste opdatering.",
     veryGood: "Meget god",
     good: "God",
     low: "Lav",
@@ -684,6 +685,7 @@ const translations = {
     seasonalLowLoad: "Acceptable for the season and low heating load.",
     seasonalModerateLoad: "The target is adjusted for season and outdoor temperature.",
     seasonalHighLoad: "Cold weather makes the return temperature requirement stricter.",
+    delayedMeterData: "Assessed as daily meter data using air temperatures from the 24 hours before the latest district heating update.",
     veryGood: "Very good",
     good: "Good",
     low: "Low",
@@ -1879,7 +1881,7 @@ let HaDistrictHeatingCard = class extends i {
           ${this.renderPlant(language)}
         </section>
 
-        ${this.renderDiagnostics(result, deltaT, severityClass, language, assessment.noteKey)}
+        ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
         ${this.renderStats(language)}
       </ha-card>
     `;
@@ -1982,7 +1984,7 @@ let HaDistrictHeatingCard = class extends i {
       <section class="stats">${stats}</section>
     `;
   }
-  renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass), noteKey) {
+  renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass), noteKeys = []) {
     var _a2;
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
     const deltaEntity = (_a2 = this.config) == null ? void 0 : _a2.delta_t_entity;
@@ -1993,7 +1995,7 @@ let HaDistrictHeatingCard = class extends i {
           <div>
             <div class="summary-title">${result.title}</div>
             <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
-            ${noteKey ? b`<div class="summary-note">${translate(language, noteKey)}</div>` : null}
+            ${noteKeys.map((noteKey) => b`<div class="summary-note">${translate(language, noteKey)}</div>`)}
           </div>
         </div>
       </section>
@@ -2047,6 +2049,16 @@ let HaDistrictHeatingCard = class extends i {
     }
     return factor;
   }
+  diagnosticNotes(seasonNote) {
+    const notes = [];
+    if (seasonNote) {
+      notes.push(seasonNote);
+    }
+    if (this.historyEndTime && Date.now() - this.historyEndTime > 18 * 60 * 60 * 1e3) {
+      notes.push("delayedMeterData");
+    }
+    return notes;
+  }
   async fetchHistoryAverages() {
     var _a2;
     if (!((_a2 = this.hass) == null ? void 0 : _a2.callWS) || !this.config) {
@@ -2056,13 +2068,13 @@ let HaDistrictHeatingCard = class extends i {
     if (entityIds.length === 0) {
       return;
     }
-    const bucket = Math.floor(Date.now() / (30 * 60 * 1e3));
+    const endTime = this.districtHeatingDataTime();
+    const bucket = Math.floor(endTime.getTime() / (30 * 60 * 1e3));
     const nextKey = `${entityIds.join("|")}:${bucket}`;
     if (this.historyKey === nextKey) {
       return;
     }
     this.historyKey = nextKey;
-    const endTime = /* @__PURE__ */ new Date();
     const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1e3);
     try {
       const history = await this.hass.callWS({
@@ -2077,9 +2089,26 @@ let HaDistrictHeatingCard = class extends i {
         indoor: this.averageHistory(history, this.config.indoor_temp_entity, startTime, endTime),
         outdoor: this.averageHistory(history, this.config.outdoor_temp_entity, startTime, endTime)
       };
+      this.historyEndTime = endTime.getTime();
     } catch (_error) {
       this.historyAverages = {};
+      this.historyEndTime = void 0;
     }
+  }
+  districtHeatingDataTime() {
+    var _a2, _b, _c;
+    const timestamps = [
+      (_a2 = this.config) == null ? void 0 : _a2.supply_temp_entity,
+      (_b = this.config) == null ? void 0 : _b.return_temp_entity,
+      (_c = this.config) == null ? void 0 : _c.delta_t_entity
+    ].map((entityId) => {
+      var _a3, _b2;
+      return entityId ? (_b2 = (_a3 = this.hass) == null ? void 0 : _a3.states[entityId]) == null ? void 0 : _b2.last_updated : void 0;
+    }).filter(Boolean).map((timestamp) => new Date(timestamp).getTime()).filter((timestamp) => Number.isFinite(timestamp));
+    if (timestamps.length === 0) {
+      return /* @__PURE__ */ new Date();
+    }
+    return new Date(Math.max(...timestamps));
   }
   averageHistory(history, entityId, startTime, endTime) {
     if (!entityId) {
@@ -2151,6 +2180,9 @@ __decorateClass([
 __decorateClass([
   r()
 ], HaDistrictHeatingCard.prototype, "historyAverages", 2);
+__decorateClass([
+  r()
+], HaDistrictHeatingCard.prototype, "historyEndTime", 2);
 HaDistrictHeatingCard = __decorateClass([
   t("ha-district-heating-card")
 ], HaDistrictHeatingCard);
