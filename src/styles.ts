@@ -13,15 +13,15 @@ export const cardStyles = css`
     --dhc-blue: #6d8ed6;
     --dhc-green: var(--success-color, #54c76d);
     --dhc-yellow: var(--warning-color, #f4bf45);
-    --dhc-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
-    --dhc-radius: var(--ha-card-border-radius, 30px);
+    --dhc-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    --dhc-radius: var(--ha-card-border-radius, 24px);
     font-family: var(--primary-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   }
 
   ha-card {
     position: relative;
     overflow: hidden;
-    padding: clamp(20px, 3vw, 30px);
+    padding: clamp(14px, 2.4vw, 22px);
     border-radius: var(--dhc-radius);
     border: 1px solid var(--dhc-border);
     background:
@@ -64,14 +64,14 @@ export const cardStyles = css`
   }
 
   .flow {
-    margin: clamp(20px, 3vw, 28px) 0 clamp(16px, 2.5vw, 24px);
+    margin: 0 0 clamp(10px, 1.8vw, 14px);
   }
 
   .flow-readings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 6px;
   }
 
   .reading {
@@ -109,7 +109,7 @@ export const cardStyles = css`
   .label {
     color: var(--dhc-red);
     text-transform: uppercase;
-    font-size: clamp(10px, 2.2vw, 12px);
+    font-size: clamp(9px, 2vw, 11px);
     font-weight: 780;
     letter-spacing: 0.04em;
   }
@@ -119,9 +119,9 @@ export const cardStyles = css`
   }
 
   .value {
-    margin-top: 7px;
+    margin-top: 4px;
     color: var(--dhc-red);
-    font-size: clamp(26px, 8vw, 42px);
+    font-size: clamp(22px, 6.6vw, 34px);
     line-height: 1;
     font-weight: 780;
   }
@@ -137,6 +137,7 @@ export const cardStyles = css`
 
   .plant svg {
     width: 100%;
+    max-height: 118px;
     height: auto;
     display: block;
     overflow: hidden;
@@ -144,28 +145,30 @@ export const cardStyles = css`
 
   .pipe-base {
     stroke-linecap: round;
-    stroke-width: 44;
+    stroke-width: 34;
     opacity: 0.92;
   }
 
   .pipe-glow {
     stroke-linecap: round;
-    stroke-width: 56;
-    opacity: 0.32;
+    stroke-width: 44;
+    opacity: 0.26;
   }
 
   .pipe-hot {
     stroke: var(--supply-color, #ef6f8e);
-    filter: drop-shadow(0 0 16px var(--supply-color, #ef6f8e));
+    filter: drop-shadow(0 0 10px var(--supply-color, #ef6f8e));
   }
 
   .pipe-cold {
     stroke: var(--return-color, #6d8ed6);
-    filter: drop-shadow(0 0 16px var(--return-color, #6d8ed6));
+    filter: drop-shadow(0 0 10px var(--return-color, #6d8ed6));
   }
 
   .house-group {
-    opacity: 0.74;
+    opacity: 0.62;
+    transform: scale(0.9);
+    transform-origin: 392px 94px;
   }
 
   .house {
@@ -186,7 +189,7 @@ export const cardStyles = css`
   .wave {
     fill: none;
     stroke: rgba(255, 255, 255, 0.86);
-    stroke-width: 2.2;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-dasharray: 34 24;
     filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.22));
@@ -202,14 +205,14 @@ export const cardStyles = css`
   }
 
   .bubbles {
-    fill: rgba(255, 255, 255, 0.9);
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.28));
+    fill: rgba(255, 255, 255, 0.86);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.24));
     animation: bubbleDrift 4.4s linear infinite, bubblePulse 2.6s ease-in-out infinite;
   }
 
   .arrow {
     fill: rgba(255, 255, 255, 0.9);
-    filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.42));
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.34));
     animation: pulse 2.8s ease-in-out infinite;
   }
 
@@ -475,19 +478,19 @@ export const cardStyles = css`
   }
 
   .label {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .value {
-    font-size: clamp(24px, 7.8vw, 36px);
+    font-size: clamp(22px, 6.6vw, 34px);
   }
 
   .diagnostics {
     display: block;
-    margin-top: 14px;
-    padding: 15px 16px;
+    margin-top: 10px;
+    padding: 12px 14px;
     border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
-    border-radius: 24px;
+    border-radius: 20px;
     background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
     cursor: pointer;
   }
@@ -495,56 +498,56 @@ export const cardStyles = css`
   .summary {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     padding: 0;
   }
 
   .status-icon {
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
     border-width: 2px;
   }
 
   .summary-title {
-    font-size: clamp(17px, 4.8vw, 21px);
+    font-size: clamp(15px, 4.1vw, 18px);
   }
 
   .summary-text {
     margin-top: 4px;
-    font-size: clamp(12px, 3.4vw, 14px);
-    line-height: 1.32;
+    font-size: clamp(11px, 3.1vw, 13px);
+    line-height: 1.26;
   }
 
   .summary-note {
-    margin-top: 6px;
+    margin-top: 4px;
     color: color-mix(in srgb, var(--severity-color) 82%, white);
-    font-size: clamp(11px, 3vw, 13px);
-    line-height: 1.28;
+    font-size: clamp(10px, 2.8vw, 12px);
+    line-height: 1.24;
   }
 
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-    gap: 10px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 8px;
   }
 
   .stat {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 8px;
+    gap: 7px;
     align-items: center;
     min-width: 0;
-    padding: 11px 12px;
+    padding: 8px 10px;
     border: 1px solid var(--dhc-border);
-    border-radius: 18px;
+    border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
   }
 
   .stat-icon {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     color: color-mix(in srgb, var(--dhc-muted) 86%, white);
   }
 
@@ -561,7 +564,7 @@ export const cardStyles = css`
 
   .stat-label {
     color: var(--dhc-muted);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 760;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -577,7 +580,7 @@ export const cardStyles = css`
     background: transparent;
     color: inherit;
     margin-top: 2px;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 740;
     white-space: nowrap;
     cursor: pointer;
@@ -644,8 +647,8 @@ export const cardStyles = css`
 
   @media (max-width: 760px) {
     ha-card {
-      padding: 18px;
-      border-radius: 22px;
+      padding: 14px;
+      border-radius: 20px;
     }
 
     .flow-readings {
@@ -653,7 +656,7 @@ export const cardStyles = css`
     }
 
     .plant svg {
-      min-height: 116px;
+      min-height: 92px;
     }
 
     .diagnostics {

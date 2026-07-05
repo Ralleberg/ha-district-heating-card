@@ -48,7 +48,7 @@ export class HaDistrictHeatingCard extends LitElement {
   }
 
   public getCardSize(): number {
-    return 4;
+    return 3;
   }
 
   protected override render() {
@@ -121,7 +121,7 @@ export class HaDistrictHeatingCard extends LitElement {
   private renderPlant(language = languageFromHass(this.hass)) {
     return html`
       <div class="plant">
-        <svg viewBox="0 0 760 180" role="img" aria-label=${translate(language, "plantAria")}>
+        <svg viewBox="0 16 760 146" role="img" aria-label=${translate(language, "plantAria")}>
           <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="360" y2="94" />
           <line class="pipe-glow pipe-cold" x1="400" y1="94" x2="736" y2="94" />
           <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
