@@ -1,115 +1,251 @@
-# ha-district-heating-card
+# District Heating Card
 
-A modern Home Assistant Lovelace card for district heating systems. It visualizes supply and return temperatures, Delta T cooling, optional energy metrics and an automatic efficiency assessment in a responsive SCADA/HMI inspired design.
+![District Heating Card](assets/district-heating-card-preview.png)
 
-## Features
+<p align="center">
 
-- Animated red supply pipe and blue return pipe.
-- Large Delta T display.
-- Automatic Delta T calculation from supply minus return when no Delta T entity is configured.
-- Efficiency assessment based on Delta T and return temperature.
-- Seasonal efficiency assessment using indoor/outdoor 24-hour averages ending at the latest district heating update when Home Assistant history data is available.
-- Optional power, daily energy, yearly energy, indoor temperature, outdoor temperature and average Delta T sensors.
-- Visual editor for selecting entities and tuning thresholds.
-- Danish and English UI based on the Home Assistant language.
-- Clickable displayed values that open the Home Assistant entity more-info dialog.
-- Theme-aware Lit/TypeScript implementation.
-- HACS-compatible release workflow.
+<a href="https://github.com/Ralleberg/ha-district-heating-card/releases">
+  <img src="https://img.shields.io/github/v/release/Ralleberg/ha-district-heating-card?style=for-the-badge" alt="Latest Release">
+</a>
 
-## Installation
+<a href="https://github.com/Ralleberg/ha-district-heating-card/blob/main/LICENSE">
+  <img src="https://img.shields.io/github/license/Ralleberg/ha-district-heating-card?style=for-the-badge" alt="License">
+</a>
 
-### HACS
+<a href="https://github.com/Ralleberg/ha-district-heating-card/releases">
+  <img src="https://img.shields.io/github/downloads/Ralleberg/ha-district-heating-card/total?style=for-the-badge" alt="Downloads">
+</a>
 
-1. Add this repository as a custom HACS frontend repository.
-2. Install `District Heating Card`.
-3. Add the resource if Home Assistant does not add it automatically:
+<a href="https://www.home-assistant.io/">
+  <img src="https://img.shields.io/badge/Home%20Assistant-Dashboard%20Card-41BDF5?style=for-the-badge&logo=homeassistant" alt="Home Assistant">
+</a>
 
-```yaml
-url: /hacsfiles/ha-district-heating-card/ha-district-heating-card.js
-type: module
+</p>
+
+<p align="center">
+
+<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=Ralleberg&repository=ha-district-heating-card&category=dashboard">
+<img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Add to HACS">
+</a>
+
+</p>
+
+---
+
+## Overview
+
+**District Heating Card** is a modern Home Assistant Lovelace card for visualizing district heating systems in a clean, SCADA-inspired interface.
+
+The card combines supply and return temperatures, Delta T cooling performance and optional energy metrics into a single dashboard component, making it easy to monitor both comfort and heating efficiency at a glance.
+
+Designed to be vendor-neutral, the card works with any district heating installation that exposes the relevant Home Assistant entities.
+
+---
+
+# Features
+
+- 🔥 Animated supply flow
+- ❄️ Animated return flow
+- 📈 Large Delta T display
+- ♻️ Automatic efficiency assessment
+- 🏠 Indoor and outdoor temperature support
+- ⚡ Optional power display
+- 📅 Daily energy consumption
+- 📆 Yearly energy consumption
+- 📊 Average Delta T support
+- 🧠 Automatic Delta T calculation when no Delta T sensor is available
+- 🌡️ Automatic seasonal efficiency assessment using Home Assistant history
+- 🖱️ Clickable values opening Home Assistant more-info dialogs
+- 🎨 Theme-aware design
+- 📱 Responsive layout
+- 🌍 Danish and English translations
+- 🚀 HACS compatible
+
+---
+
+# Installation
+
+## HACS (Recommended)
+
+Click below to add the repository directly to HACS.
+
+<p align="center">
+
+<a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=Ralleberg&repository=ha-district-heating-card&category=dashboard">
+<img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Add to HACS">
+</a>
+
+</p>
+
+After adding the repository:
+
+1. Open **HACS**
+2. Install **District Heating Card**
+3. Refresh your browser
+4. Add the card to your dashboard
+
+---
+
+## Manual Installation
+
+Download the latest release and copy
+
 ```
 
-### Manual
+ha-district-heating-card.js
 
-1. Download `ha-district-heating-card.js` from the latest GitHub release.
-2. Copy it to `www/community/ha-district-heating-card/`.
-3. Add this Lovelace resource:
+```
+
+to
+
+```
+
+/config/www/community/ha-district-heating-card/
+
+```
+
+Then add the resource:
 
 ```yaml
 url: /local/community/ha-district-heating-card/ha-district-heating-card.js
 type: module
 ```
 
-## Example
+Refresh your browser afterwards.
+
+---
+
+# Example Configuration
 
 ```yaml
 type: custom:ha-district-heating-card
-name: Fjernvarme
+
+name: District Heating
+
 supply_temp_entity: sensor.fjernvarme_fremlob
 return_temp_entity: sensor.fjernvarme_returlob
+
 power_entity: sensor.fjernvarme_effekt
+
 energy_today_entity: sensor.fjernvarme_energi_i_dag
 yearly_energy_entity: sensor.fjernvarme_forbrug_aar
+
 outdoor_temp_entity: sensor.udetemperatur
 indoor_temp_entity: sensor.indetemperatur
+
 average_delta_t_entity: sensor.fjernvarme_delta_t_gennemsnit
+
 min_delta_t: 20
 good_delta_t: 30
+
 max_return_temp: 45
 good_return_temp: 35
-supply_color_low_temp: 50
-supply_color_high_temp: 75
-supply_color_low: "#f28aa0"
-supply_color_high: "#8f2438"
-return_color_low_temp: 0
-return_color_high_temp: 35
-return_color_low: "#f4f7fb"
-return_color_high: "#3f6ed6"
 ```
 
-If `delta_t_entity` is omitted, the card calculates Delta T as:
+If `delta_t_entity` is not configured, the card automatically calculates:
 
 ```text
-supply_temp_entity - return_temp_entity
+Delta T = Supply Temperature − Return Temperature
 ```
 
-## Configuration
+---
 
-| Option | Required | Default | Description |
-| --- | --- | --- | --- |
-| `type` | Yes |  | `custom:ha-district-heating-card` |
-| `name` | No | `Fjernvarme` | Card title |
-| `supply_temp_entity` | Yes |  | Supply temperature sensor |
-| `return_temp_entity` | Yes |  | Return temperature sensor |
-| `delta_t_entity` | No |  | Optional Delta T sensor |
-| `power_entity` | No |  | Current power sensor |
-| `energy_today_entity` | No |  | Energy used today |
-| `yearly_energy_entity` | No |  | Yearly energy usage |
-| `outdoor_temp_entity` | No |  | Outdoor temperature |
-| `indoor_temp_entity` | No |  | Indoor temperature |
-| `average_delta_t_entity` | No |  | Average Delta T |
-| `min_delta_t` | No | `20` | Lowest acceptable Delta T |
-| `good_delta_t` | No | `30` | Delta T considered good |
-| `max_return_temp` | No | `45` | Highest acceptable return temperature |
-| `good_return_temp` | No | `35` | Return temperature considered good |
-| `supply_color_low_temp` | No | `50` | Temperature for the light supply flow color |
-| `supply_color_high_temp` | No | `75` | Temperature for the dark supply flow color |
-| `supply_color_low` | No | `#f28aa0` | Light supply flow color |
-| `supply_color_high` | No | `#8f2438` | Dark supply flow color |
-| `return_color_low_temp` | No | `0` | Temperature for the light return flow color |
-| `return_color_high_temp` | No | `35` | Temperature for the blue return flow color |
-| `return_color_low` | No | `#f4f7fb` | Light return flow color |
-| `return_color_high` | No | `#3f6ed6` | Blue return flow color |
+# Configuration
 
-## Development
+## Required Entities
+
+| Entity | Description |
+|----------|-------------|
+| `supply_temp_entity` | Supply temperature |
+| `return_temp_entity` | Return temperature |
+
+---
+
+## Optional Entities
+
+| Entity | Description |
+|----------|-------------|
+| `delta_t_entity` | Measured Delta T |
+| `power_entity` | Current heating power |
+| `energy_today_entity` | Daily energy consumption |
+| `yearly_energy_entity` | Yearly energy consumption |
+| `outdoor_temp_entity` | Outdoor temperature |
+| `indoor_temp_entity` | Indoor temperature |
+| `average_delta_t_entity` | Average Delta T |
+
+---
+
+## Thresholds
+
+| Option | Default | Description |
+|----------|----------|-------------|
+| `min_delta_t` | 20 | Lowest acceptable Delta T |
+| `good_delta_t` | 30 | Good Delta T |
+| `max_return_temp` | 45 | Highest acceptable return temperature |
+| `good_return_temp` | 35 | Good return temperature |
+
+---
+
+## Pipe Colors
+
+Both supply and return flow colors can be customized to match your installation or Home Assistant theme.
+
+| Option | Default |
+|----------|----------|
+| `supply_color_low` | `#f28aa0` |
+| `supply_color_high` | `#8f2438` |
+| `return_color_low` | `#f4f7fb` |
+| `return_color_high` | `#3f6ed6` |
+
+---
+
+# How Efficiency Is Calculated
+
+The card combines multiple indicators to estimate district heating performance.
+
+These include:
+
+- Delta T cooling
+- Return temperature
+- Outdoor temperature
+- Indoor temperature
+- Seasonal operating conditions
+- Home Assistant history (when available)
+
+When Home Assistant recorder statistics are available, the card evaluates heating performance using rolling 24-hour averages ending at the latest district heating update, providing a more stable efficiency assessment than instantaneous values alone.
+
+---
+
+# Development
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run a production build:
+
+```bash
 npm run build
 ```
 
-The built Home Assistant module is written to:
+The compiled dashboard card is written to:
 
 ```text
 ha-district-heating-card.js
 ```
+
+---
+
+# Contributing
+
+Contributions are always welcome.
+
+Bug reports, feature requests and pull requests are greatly appreciated.
+
+---
+
+# License
+
+Released under the **MIT License**.
