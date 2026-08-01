@@ -211,7 +211,7 @@ export const cardStyles = css`
   }
 
   .return-arrow {
-    transform-origin: 627px 94px;
+    transform-origin: 558px 94px;
   }
 
   .metrics {
