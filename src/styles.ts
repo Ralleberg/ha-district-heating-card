@@ -161,8 +161,8 @@ export const cardStyles = css`
 
   .house-group {
     opacity: 0.62;
-    transform: scale(0.9);
-    transform-origin: 392px 94px;
+    transform: translateX(-12px) scale(0.9);
+    transform-origin: 380px 94px;
   }
 
   .house {
@@ -211,7 +211,7 @@ export const cardStyles = css`
   }
 
   .return-arrow {
-    transform-origin: 645px 94px;
+    transform-origin: 627px 94px;
   }
 
   .metrics {

@@ -129,7 +129,8 @@ power_entity: sensor.fjernvarme_effekt
 
 energy_today_entity: sensor.fjernvarme_energi_i_dag
 yearly_energy_entity: sensor.fjernvarme_forbrug_aar
-
+consumption_day_entity: sensor.fjernvarme_forbrug_dag
+consumption_ytd_entity: sensor.fjernvarme_forbrug_aargang
 outdoor_temp_entity: sensor.udetemperatur
 indoor_temp_entity: sensor.indetemperatur
 
@@ -169,6 +170,8 @@ Delta T = Supply Temperature − Return Temperature
 | `power_entity` | Current heating power |
 | `energy_today_entity` | Daily energy consumption |
 | `yearly_energy_entity` | Yearly energy consumption |
+| `consumption_day_entity` | Daily heat consumption |
+| `consumption_ytd_entity` | Year-to-date heat consumption |
 | `outdoor_temp_entity` | Outdoor temperature |
 | `indoor_temp_entity` | Indoor temperature |
 | `average_delta_t_entity` | Average Delta T |

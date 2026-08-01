@@ -610,6 +610,8 @@ const translations = {
     power: "Effekt",
     today: "I dag",
     year: "I år",
+    consumptionDay: "Forbrug dag",
+    consumptionYtd: "Forbrug ÅTD",
     missingData: "Mangler data",
     excellentTitle: "Meget effektiv udnyttelse",
     goodTitle: "God udnyttelse",
@@ -642,6 +644,8 @@ const translations = {
     editorOptionalMetrics: "Valgfrie driftstal",
     editorEnergyToday: "Energi i dag",
     editorYearlyEnergy: "Forbrug i år",
+    editorConsumptionDay: "Forbrug dag",
+    editorConsumptionYtd: "Forbrug ÅTD",
     editorAssessmentInput: "Input til vurdering",
     editorOutdoorTemp: "Udetemperatur",
     editorIndoorTemp: "Indetemperatur",
@@ -666,6 +670,8 @@ const translations = {
     power: "Power",
     today: "Today",
     year: "Year",
+    consumptionDay: "Daily usage",
+    consumptionYtd: "YTD usage",
     missingData: "Missing data",
     excellentTitle: "Very efficient utilization",
     goodTitle: "Good utilization",
@@ -698,6 +704,8 @@ const translations = {
     editorOptionalMetrics: "Optional metrics",
     editorEnergyToday: "Energy today",
     editorYearlyEnergy: "Yearly energy",
+    editorConsumptionDay: "Daily usage",
+    editorConsumptionYtd: "YTD usage",
     editorAssessmentInput: "Assessment input",
     editorOutdoorTemp: "Outdoor temperature",
     editorIndoorTemp: "Indoor temperature",
@@ -1086,8 +1094,8 @@ const cardStyles = i$3`
 
   .house-group {
     opacity: 0.62;
-    transform: scale(0.9);
-    transform-origin: 392px 94px;
+    transform: translateX(-12px) scale(0.9);
+    transform-origin: 380px 94px;
   }
 
   .house {
@@ -1136,7 +1144,7 @@ const cardStyles = i$3`
   }
 
   .return-arrow {
-    transform-origin: 645px 94px;
+    transform-origin: 627px 94px;
   }
 
   .metrics {
@@ -1682,6 +1690,8 @@ let DistrictHeatingCardEditor = class extends i {
       ${this.entityPicker(translate(language, "power"), "power_entity")}
       ${this.entityPicker(translate(language, "editorEnergyToday"), "energy_today_entity")}
       ${this.entityPicker(translate(language, "editorYearlyEnergy"), "yearly_energy_entity")}
+      ${this.entityPicker(translate(language, "editorConsumptionDay"), "consumption_day_entity")}
+      ${this.entityPicker(translate(language, "editorConsumptionYtd"), "consumption_ytd_entity")}
 
       <div class="section">${translate(language, "editorAssessmentInput")}</div>
       ${this.entityPicker(translate(language, "editorOutdoorTemp"), "outdoor_temp_entity")}
@@ -1899,10 +1909,10 @@ let HaDistrictHeatingCard = class extends i {
     return b`
       <div class="plant">
         <svg viewBox="0 16 760 146" role="img" aria-label=${translate(language, "plantAria")}>
-          <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="360" y2="94" />
-          <line class="pipe-glow pipe-cold" x1="400" y1="94" x2="736" y2="94" />
-          <line class="pipe-base pipe-hot" x1="24" y1="94" x2="360" y2="94" />
-          <line class="pipe-base pipe-cold" x1="400" y1="94" x2="736" y2="94" />
+          <line class="pipe-glow pipe-hot" x1="24" y1="94" x2="380" y2="94" />
+          <line class="pipe-glow pipe-cold" x1="380" y1="94" x2="736" y2="94" />
+          <line class="pipe-base pipe-hot" x1="24" y1="94" x2="380" y2="94" />
+          <line class="pipe-base pipe-cold" x1="380" y1="94" x2="736" y2="94" />
 
           <g class="house-group">
             <path class="house" d="M331 78V45h-32c-9 0-13-12-6-17l88-31a20 20 0 0 1 22 0l88 31c7 5 3 17-6 17h-32v103c0 11-9 20-20 20h-82c-11 0-20-9-20-20V78Z" />
@@ -1923,29 +1933,29 @@ let HaDistrictHeatingCard = class extends i {
           </g>
 
           <g class="water-flow">
-            <path class="wave supply-wave wave-a" d="M42 89 C64 76 84 112 106 98 S150 76 172 94 S216 111 238 93 S282 77 304 95 S330 105 352 92" />
-            <path class="wave supply-wave wave-b" d="M38 101 C62 112 82 78 106 91 S150 112 174 92 S218 78 242 95 S286 111 344 92" />
+            <path class="wave supply-wave wave-a" d="M42 89 C66 76 88 112 112 98 S160 76 184 94 S232 111 256 93 S304 77 328 95 S352 105 376 92" />
+            <path class="wave supply-wave wave-b" d="M38 101 C64 112 86 78 112 91 S160 112 186 92 S234 78 260 95 S308 111 374 92" />
             <g class="bubbles supply-bubbles">
               <circle cx="68" cy="89" r="3.2" />
               <circle cx="108" cy="102" r="2.3" />
-              <circle cx="151" cy="86" r="2.7" />
-              <circle cx="204" cy="101" r="3" />
-              <circle cx="253" cy="88" r="2.2" />
-              <circle cx="306" cy="101" r="2.8" />
+              <circle cx="158" cy="86" r="2.7" />
+              <circle cx="214" cy="101" r="3" />
+              <circle cx="268" cy="88" r="2.2" />
+              <circle cx="326" cy="101" r="2.8" />
             </g>
-            <polygon class="arrow supply-arrow" points="214,72 252,94 214,116" />
+            <polygon class="arrow supply-arrow" points="286,72 324,94 286,116" />
 
-            <path class="wave return-wave wave-a" d="M410 89 C434 76 454 112 478 98 S522 76 546 94 S590 111 614 93 S658 77 680 95 S704 105 724 92" />
-            <path class="wave return-wave wave-b" d="M410 101 C434 112 454 78 478 91 S522 112 546 92 S590 78 614 95 S658 111 724 92" />
+            <path class="wave return-wave wave-a" d="M384 89 C408 76 430 112 454 98 S502 76 526 94 S574 111 598 93 S646 77 670 95 S710 105 734 92" />
+            <path class="wave return-wave wave-b" d="M384 101 C410 112 432 78 458 91 S506 112 532 92 S580 78 606 95 S654 111 734 92" />
             <g class="bubbles return-bubbles">
-              <circle cx="440" cy="101" r="2.8" />
-              <circle cx="489" cy="87" r="2.2" />
-              <circle cx="532" cy="102" r="3.1" />
-              <circle cx="586" cy="88" r="2.6" />
-              <circle cx="637" cy="101" r="2.4" />
-              <circle cx="694" cy="88" r="3" />
+              <circle cx="414" cy="101" r="2.8" />
+              <circle cx="466" cy="87" r="2.2" />
+              <circle cx="520" cy="102" r="3.1" />
+              <circle cx="578" cy="88" r="2.6" />
+              <circle cx="638" cy="101" r="2.4" />
+              <circle cx="704" cy="88" r="3" />
             </g>
-            <polygon class="arrow return-arrow" points="626,72 664,94 626,116" />
+            <polygon class="arrow return-arrow" points="608,72 646,94 608,116" />
           </g>
         </svg>
       </div>
@@ -1969,11 +1979,13 @@ let HaDistrictHeatingCard = class extends i {
     `;
   }
   renderStats(language = languageFromHass(this.hass)) {
-    var _a2, _b, _c;
+    var _a2, _b, _c, _d, _e;
     const stats = [
       ((_a2 = this.config) == null ? void 0 : _a2.power_entity) ? this.renderStat(translate(language, "power"), "power_entity", "kW", icons.flame) : null,
       ((_b = this.config) == null ? void 0 : _b.energy_today_entity) ? this.renderStat(translate(language, "today"), "energy_today_entity", "kWh", icons.drop) : null,
-      ((_c = this.config) == null ? void 0 : _c.yearly_energy_entity) ? this.renderStat(translate(language, "year"), "yearly_energy_entity", "MWh", icons.chart) : null
+      ((_c = this.config) == null ? void 0 : _c.yearly_energy_entity) ? this.renderStat(translate(language, "year"), "yearly_energy_entity", "MWh", icons.chart) : null,
+      ((_d = this.config) == null ? void 0 : _d.consumption_day_entity) ? this.renderStat(translate(language, "consumptionDay"), "consumption_day_entity", "kWh", icons.flame) : null,
+      ((_e = this.config) == null ? void 0 : _e.consumption_ytd_entity) ? this.renderStat(translate(language, "consumptionYtd"), "consumption_ytd_entity", "kWh", icons.chart) : null
     ].filter(Boolean);
     if (stats.length === 0) {
       return null;
