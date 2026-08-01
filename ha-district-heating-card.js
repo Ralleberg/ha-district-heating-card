@@ -1143,10 +1143,6 @@ const cardStyles = i$3`
     animation: pulse 2.8s ease-in-out infinite;
   }
 
-  .return-arrow {
-    transform-origin: 558px 94px;
-  }
-
   .metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
@@ -1552,23 +1548,9 @@ const cardStyles = i$3`
     0%,
     100% {
       opacity: 0.72;
-      transform: translateX(0);
     }
     50% {
       opacity: 1;
-      transform: translateX(4px);
-    }
-  }
-
-  @keyframes pulseBack {
-    0%,
-    100% {
-      opacity: 0.72;
-      transform: translateX(0);
-    }
-    50% {
-      opacity: 1;
-      transform: translateX(-4px);
     }
   }
 
@@ -1943,7 +1925,9 @@ let HaDistrictHeatingCard = class extends i {
               <circle cx="268" cy="88" r="2.2" />
               <circle cx="326" cy="101" r="2.8" />
             </g>
-            <polygon class="arrow supply-arrow" points="183,72 221,94 183,116" />
+            <g class="arrow supply-arrow" transform="translate(202 94)">
+              <polygon points="-19,-22 19,0 -19,22" />
+            </g>
 
             <path class="wave return-wave wave-a" d="M384 89 C408 76 430 112 454 98 S502 76 526 94 S574 111 598 93 S646 77 670 95 S710 105 734 92" />
             <path class="wave return-wave wave-b" d="M384 101 C410 112 432 78 458 91 S506 112 532 92 S580 78 606 95 S654 111 734 92" />
@@ -1955,7 +1939,9 @@ let HaDistrictHeatingCard = class extends i {
               <circle cx="638" cy="101" r="2.4" />
               <circle cx="704" cy="88" r="3" />
             </g>
-            <polygon class="arrow return-arrow" points="539,72 577,94 539,116" />
+            <g class="arrow return-arrow" transform="translate(558 94)">
+              <polygon points="-19,-22 19,0 -19,22" />
+            </g>
           </g>
         </svg>
       </div>

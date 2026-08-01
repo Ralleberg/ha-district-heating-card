@@ -210,10 +210,6 @@ export const cardStyles = css`
     animation: pulse 2.8s ease-in-out infinite;
   }
 
-  .return-arrow {
-    transform-origin: 558px 94px;
-  }
-
   .metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
@@ -619,23 +615,9 @@ export const cardStyles = css`
     0%,
     100% {
       opacity: 0.72;
-      transform: translateX(0);
     }
     50% {
       opacity: 1;
-      transform: translateX(4px);
-    }
-  }
-
-  @keyframes pulseBack {
-    0%,
-    100% {
-      opacity: 0.72;
-      transform: translateX(0);
-    }
-    50% {
-      opacity: 1;
-      transform: translateX(-4px);
     }
   }
 
