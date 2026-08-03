@@ -536,13 +536,14 @@ export const cardStyles = css`
     min-width: 0;
     width: 100%;
     padding: 9px 10px;
-    border: 1px solid var(--dhc-border);
+    border: 0;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.04);
+    background: color-mix(in srgb, var(--dhc-background) 82%, transparent);
     color: inherit;
     font: inherit;
     text-align: left;
     cursor: pointer;
+    box-shadow: none;
   }
 
   .stat:disabled {
