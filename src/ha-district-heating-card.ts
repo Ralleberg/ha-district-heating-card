@@ -181,13 +181,12 @@ export class HaDistrictHeatingCard extends LitElement {
     `;
   }
 
-  private renderStat(label: string, key: keyof DistrictHeatingCardConfig, fallbackUnit: string, icon: unknown) {
-    const entityId = this.config?.[key];
-    const value = typeof entityId === "string" ? numericState(this.hass, entityId) : undefined;
-    const labelUnit = typeof entityId === "string" ? unit(this.hass, entityId, fallbackUnit) : fallbackUnit;
+  private renderStat(label: string, entityId: string | undefined, fallbackUnit: string, icon: unknown) {
+    const value = numericState(this.hass, entityId);
+    const labelUnit = unit(this.hass, entityId, fallbackUnit);
 
     return html`
-      <button class="stat" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : undefined)}>
+      <button class="stat" ?disabled=${!entityId} @click=${() => this.showMoreInfo(entityId)}>
         <span class="stat-icon">${icon}</span>
         <span class="stat-text">
           <span class="stat-label">${label}</span>
@@ -198,19 +197,27 @@ export class HaDistrictHeatingCard extends LitElement {
   }
 
   private renderStats(language = languageFromHass(this.hass)) {
-    const stats = [
-      this.config?.daily_power_entity ? this.renderStat(translate(language, "dailyPower"), "daily_power_entity", "kWh", icons.flame) : null,
-      this.config?.ytd_power_entity ? this.renderStat(translate(language, "ytdPower"), "ytd_power_entity", "kWh", icons.chart) : null,
-      this.config?.daily_cost_entity ? this.renderStat(translate(language, "dailyCost"), "daily_cost_entity", "DKK", icons.drop) : null,
-      this.config?.ytd_cost_entity ? this.renderStat(translate(language, "ytdCost"), "ytd_cost_entity", "DKK", icons.chart) : null,
-    ].filter(Boolean);
+    const dailyPowerEntity = this.config?.daily_power_entity ?? this.config?.energy_today_entity;
+    const ytdPowerEntity = this.config?.ytd_power_entity ?? this.config?.yearly_energy_entity;
+    const dailyCostEntity = this.config?.daily_cost_entity ?? this.config?.consumption_day_entity;
+    const ytdCostEntity = this.config?.ytd_cost_entity ?? this.config?.consumption_ytd_entity;
+    const hasStats = [dailyPowerEntity, ytdPowerEntity, dailyCostEntity, ytdCostEntity].some(Boolean);
 
-    if (stats.length === 0) {
+    if (!hasStats) {
       return null;
     }
 
     return html`
-      <section class="stats">${stats}</section>
+      <section class="stats">
+        <div class="stat-row">
+          ${this.renderStat(translate(language, "dailyPower"), dailyPowerEntity, "kWh", icons.flame)}
+          ${this.renderStat(translate(language, "ytdPower"), ytdPowerEntity, "kWh", icons.chart)}
+        </div>
+        <div class="stat-row">
+          ${this.renderStat(translate(language, "dailyCost"), dailyCostEntity, "DKK", icons.drop)}
+          ${this.renderStat(translate(language, "ytdCost"), ytdCostEntity, "DKK", icons.chart)}
+        </div>
+      </section>
     `;
   }
 

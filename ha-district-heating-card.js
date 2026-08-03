@@ -1464,10 +1464,16 @@ const cardStyles = i$3`
   }
 
   .stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     margin-top: 12px;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
   }
 
   .stat {
@@ -1967,13 +1973,11 @@ let HaDistrictHeatingCard = class extends i {
       </div>
     `;
   }
-  renderStat(label, key, fallbackUnit, icon) {
-    var _a2;
-    const entityId = (_a2 = this.config) == null ? void 0 : _a2[key];
-    const value = typeof entityId === "string" ? numericState(this.hass, entityId) : void 0;
-    const labelUnit = typeof entityId === "string" ? unit(this.hass, entityId, fallbackUnit) : fallbackUnit;
+  renderStat(label, entityId, fallbackUnit, icon) {
+    const value = numericState(this.hass, entityId);
+    const labelUnit = unit(this.hass, entityId, fallbackUnit);
     return b`
-      <button class="stat" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : void 0)}>
+      <button class="stat" ?disabled=${!entityId} @click=${() => this.showMoreInfo(entityId)}>
         <span class="stat-icon">${icon}</span>
         <span class="stat-text">
           <span class="stat-label">${label}</span>
@@ -1983,18 +1987,26 @@ let HaDistrictHeatingCard = class extends i {
     `;
   }
   renderStats(language = languageFromHass(this.hass)) {
-    var _a2, _b, _c, _d;
-    const stats = [
-      ((_a2 = this.config) == null ? void 0 : _a2.daily_power_entity) ? this.renderStat(translate(language, "dailyPower"), "daily_power_entity", "kWh", icons.flame) : null,
-      ((_b = this.config) == null ? void 0 : _b.ytd_power_entity) ? this.renderStat(translate(language, "ytdPower"), "ytd_power_entity", "kWh", icons.chart) : null,
-      ((_c = this.config) == null ? void 0 : _c.daily_cost_entity) ? this.renderStat(translate(language, "dailyCost"), "daily_cost_entity", "DKK", icons.drop) : null,
-      ((_d = this.config) == null ? void 0 : _d.ytd_cost_entity) ? this.renderStat(translate(language, "ytdCost"), "ytd_cost_entity", "DKK", icons.chart) : null
-    ].filter(Boolean);
-    if (stats.length === 0) {
+    var _a2, _b, _c, _d, _e, _f, _g, _h;
+    const dailyPowerEntity = ((_a2 = this.config) == null ? void 0 : _a2.daily_power_entity) ?? ((_b = this.config) == null ? void 0 : _b.energy_today_entity);
+    const ytdPowerEntity = ((_c = this.config) == null ? void 0 : _c.ytd_power_entity) ?? ((_d = this.config) == null ? void 0 : _d.yearly_energy_entity);
+    const dailyCostEntity = ((_e = this.config) == null ? void 0 : _e.daily_cost_entity) ?? ((_f = this.config) == null ? void 0 : _f.consumption_day_entity);
+    const ytdCostEntity = ((_g = this.config) == null ? void 0 : _g.ytd_cost_entity) ?? ((_h = this.config) == null ? void 0 : _h.consumption_ytd_entity);
+    const hasStats = [dailyPowerEntity, ytdPowerEntity, dailyCostEntity, ytdCostEntity].some(Boolean);
+    if (!hasStats) {
       return null;
     }
     return b`
-      <section class="stats">${stats}</section>
+      <section class="stats">
+        <div class="stat-row">
+          ${this.renderStat(translate(language, "dailyPower"), dailyPowerEntity, "kWh", icons.flame)}
+          ${this.renderStat(translate(language, "ytdPower"), ytdPowerEntity, "kWh", icons.chart)}
+        </div>
+        <div class="stat-row">
+          ${this.renderStat(translate(language, "dailyCost"), dailyCostEntity, "DKK", icons.drop)}
+          ${this.renderStat(translate(language, "ytdCost"), ytdCostEntity, "DKK", icons.chart)}
+        </div>
+      </section>
     `;
   }
   renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass), noteKeys = []) {

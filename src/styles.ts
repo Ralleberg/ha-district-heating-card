@@ -515,10 +515,16 @@ export const cardStyles = css`
   }
 
   .stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     margin-top: 12px;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
   }
 
   .stat {

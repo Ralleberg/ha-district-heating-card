@@ -171,6 +171,8 @@ Delta T = Supply Temperature − Return Temperature
 | `indoor_temp_entity` | Indoor temperature |
 | `average_delta_t_entity` | Average Delta T |
 
+The four bottom metrics render as two fixed rows with two boxes per row. Older keys are still accepted as fallbacks: `energy_today_entity`, `yearly_energy_entity`, `consumption_day_entity`, and `consumption_ytd_entity`.
+
 ---
 
 ## Thresholds
