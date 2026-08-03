@@ -84,13 +84,11 @@ export const cardStyles = css`
     cursor: default;
   }
 
-  .reading:not(:disabled):hover,
-  .stat-value:not(:disabled):hover {
+  .reading:not(:disabled):hover {
     opacity: 0.86;
   }
 
-  .reading:not(:disabled):focus-visible,
-  .stat-value:not(:disabled):focus-visible {
+  .reading:not(:disabled):focus-visible {
     outline: 2px solid color-mix(in srgb, var(--primary-text-color, #fff) 42%, transparent);
     outline-offset: 4px;
     border-radius: 8px;
@@ -518,21 +516,40 @@ export const cardStyles = css`
 
   .stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 12px;
   }
 
   .stat {
+    appearance: none;
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 7px;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
     align-items: center;
     min-width: 0;
-    padding: 8px 10px;
+    width: 100%;
+    padding: 9px 10px;
     border: 1px solid var(--dhc-border);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .stat:disabled {
+    cursor: default;
+  }
+
+  .stat:not(:disabled):hover {
+    opacity: 0.86;
+  }
+
+  .stat:not(:disabled):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary-text-color, #fff) 42%, transparent);
+    outline-offset: 3px;
   }
 
   .stat-icon {
@@ -561,26 +578,14 @@ export const cardStyles = css`
   }
 
   .stat-value {
-    appearance: none;
-    width: fit-content;
-    min-width: 0;
     margin: 2px 0 0;
     padding: 0;
-    border: 0;
-    background: transparent;
     color: inherit;
     margin-top: 2px;
     font-size: 13px;
     font-weight: 740;
     white-space: nowrap;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
     text-decoration: none;
-  }
-
-  .stat-value:disabled {
-    cursor: default;
   }
 
   @keyframes waterWave {

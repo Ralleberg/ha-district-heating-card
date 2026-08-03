@@ -34,11 +34,10 @@ export class DistrictHeatingCardEditor extends LitElement {
       ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
       <div class="section">${translate(language, "editorOptionalMetrics")}</div>
-      ${this.entityPicker(translate(language, "power"), "power_entity")}
-      ${this.entityPicker(translate(language, "editorEnergyToday"), "energy_today_entity")}
-      ${this.entityPicker(translate(language, "editorYearlyEnergy"), "yearly_energy_entity")}
-      ${this.entityPicker(translate(language, "editorConsumptionDay"), "consumption_day_entity")}
-      ${this.entityPicker(translate(language, "editorConsumptionYtd"), "consumption_ytd_entity")}
+      ${this.entityPicker(translate(language, "editorDailyPower"), "daily_power_entity")}
+      ${this.entityPicker(translate(language, "editorYtdPower"), "ytd_power_entity")}
+      ${this.entityPicker(translate(language, "editorDailyCost"), "daily_cost_entity")}
+      ${this.entityPicker(translate(language, "editorYtdCost"), "ytd_cost_entity")}
 
       <div class="section">${translate(language, "editorAssessmentInput")}</div>
       ${this.entityPicker(translate(language, "editorOutdoorTemp"), "outdoor_temp_entity")}

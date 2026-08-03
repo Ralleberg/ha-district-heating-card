@@ -27,6 +27,10 @@ export interface DistrictHeatingCardConfig {
   yearly_energy_entity?: string;
   consumption_day_entity?: string;
   consumption_ytd_entity?: string;
+  daily_power_entity?: string;
+  ytd_power_entity?: string;
+  daily_cost_entity?: string;
+  ytd_cost_entity?: string;
   outdoor_temp_entity?: string;
   indoor_temp_entity?: string;
   average_delta_t_entity?: string;

@@ -612,6 +612,10 @@ const translations = {
     year: "I år",
     consumptionDay: "Forbrug dag",
     consumptionYtd: "Forbrug ÅTD",
+    dailyPower: "Dags effekt",
+    ytdPower: "ÅTD effekt",
+    dailyCost: "Dags kost",
+    ytdCost: "ÅTD kost",
     missingData: "Mangler data",
     excellentTitle: "Meget effektiv udnyttelse",
     goodTitle: "God udnyttelse",
@@ -646,6 +650,10 @@ const translations = {
     editorYearlyEnergy: "Forbrug i år",
     editorConsumptionDay: "Forbrug dag",
     editorConsumptionYtd: "Forbrug ÅTD",
+    editorDailyPower: "Dags effekt",
+    editorYtdPower: "ÅTD effekt",
+    editorDailyCost: "Dags kost",
+    editorYtdCost: "ÅTD kost",
     editorAssessmentInput: "Input til vurdering",
     editorOutdoorTemp: "Udetemperatur",
     editorIndoorTemp: "Indetemperatur",
@@ -672,6 +680,10 @@ const translations = {
     year: "Year",
     consumptionDay: "Daily usage",
     consumptionYtd: "YTD usage",
+    dailyPower: "Daily power",
+    ytdPower: "YTD power",
+    dailyCost: "Daily cost",
+    ytdCost: "YTD cost",
     missingData: "Missing data",
     excellentTitle: "Very efficient utilization",
     goodTitle: "Good utilization",
@@ -706,6 +718,10 @@ const translations = {
     editorYearlyEnergy: "Yearly energy",
     editorConsumptionDay: "Daily usage",
     editorConsumptionYtd: "YTD usage",
+    editorDailyPower: "Daily power",
+    editorYtdPower: "YTD power",
+    editorDailyCost: "Daily cost",
+    editorYtdCost: "YTD cost",
     editorAssessmentInput: "Assessment input",
     editorOutdoorTemp: "Outdoor temperature",
     editorIndoorTemp: "Indoor temperature",
@@ -1017,13 +1033,11 @@ const cardStyles = i$3`
     cursor: default;
   }
 
-  .reading:not(:disabled):hover,
-  .stat-value:not(:disabled):hover {
+  .reading:not(:disabled):hover {
     opacity: 0.86;
   }
 
-  .reading:not(:disabled):focus-visible,
-  .stat-value:not(:disabled):focus-visible {
+  .reading:not(:disabled):focus-visible {
     outline: 2px solid color-mix(in srgb, var(--primary-text-color, #fff) 42%, transparent);
     outline-offset: 4px;
     border-radius: 8px;
@@ -1451,21 +1465,40 @@ const cardStyles = i$3`
 
   .stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 12px;
   }
 
   .stat {
+    appearance: none;
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 7px;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
     align-items: center;
     min-width: 0;
-    padding: 8px 10px;
+    width: 100%;
+    padding: 9px 10px;
     border: 1px solid var(--dhc-border);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .stat:disabled {
+    cursor: default;
+  }
+
+  .stat:not(:disabled):hover {
+    opacity: 0.86;
+  }
+
+  .stat:not(:disabled):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary-text-color, #fff) 42%, transparent);
+    outline-offset: 3px;
   }
 
   .stat-icon {
@@ -1494,26 +1527,14 @@ const cardStyles = i$3`
   }
 
   .stat-value {
-    appearance: none;
-    width: fit-content;
-    min-width: 0;
     margin: 2px 0 0;
     padding: 0;
-    border: 0;
-    background: transparent;
     color: inherit;
     margin-top: 2px;
     font-size: 13px;
     font-weight: 740;
     white-space: nowrap;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
     text-decoration: none;
-  }
-
-  .stat-value:disabled {
-    cursor: default;
   }
 
   @keyframes waterWave {
@@ -1669,11 +1690,10 @@ let DistrictHeatingCardEditor = class extends i {
       ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
       <div class="section">${translate(language, "editorOptionalMetrics")}</div>
-      ${this.entityPicker(translate(language, "power"), "power_entity")}
-      ${this.entityPicker(translate(language, "editorEnergyToday"), "energy_today_entity")}
-      ${this.entityPicker(translate(language, "editorYearlyEnergy"), "yearly_energy_entity")}
-      ${this.entityPicker(translate(language, "editorConsumptionDay"), "consumption_day_entity")}
-      ${this.entityPicker(translate(language, "editorConsumptionYtd"), "consumption_ytd_entity")}
+      ${this.entityPicker(translate(language, "editorDailyPower"), "daily_power_entity")}
+      ${this.entityPicker(translate(language, "editorYtdPower"), "ytd_power_entity")}
+      ${this.entityPicker(translate(language, "editorDailyCost"), "daily_cost_entity")}
+      ${this.entityPicker(translate(language, "editorYtdCost"), "ytd_cost_entity")}
 
       <div class="section">${translate(language, "editorAssessmentInput")}</div>
       ${this.entityPicker(translate(language, "editorOutdoorTemp"), "outdoor_temp_entity")}
@@ -1953,25 +1973,22 @@ let HaDistrictHeatingCard = class extends i {
     const value = typeof entityId === "string" ? numericState(this.hass, entityId) : void 0;
     const labelUnit = typeof entityId === "string" ? unit(this.hass, entityId, fallbackUnit) : fallbackUnit;
     return b`
-      <div class="stat">
+      <button class="stat" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : void 0)}>
         <span class="stat-icon">${icon}</span>
         <span class="stat-text">
           <span class="stat-label">${label}</span>
-          <button class="stat-value" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : void 0)}>
-            ${formatValue(value, labelUnit)}
-          </button>
+          <span class="stat-value">${formatValue(value, labelUnit)}</span>
         </span>
-      </div>
+      </button>
     `;
   }
   renderStats(language = languageFromHass(this.hass)) {
-    var _a2, _b, _c, _d, _e;
+    var _a2, _b, _c, _d;
     const stats = [
-      ((_a2 = this.config) == null ? void 0 : _a2.power_entity) ? this.renderStat(translate(language, "power"), "power_entity", "kW", icons.flame) : null,
-      ((_b = this.config) == null ? void 0 : _b.energy_today_entity) ? this.renderStat(translate(language, "today"), "energy_today_entity", "kWh", icons.drop) : null,
-      ((_c = this.config) == null ? void 0 : _c.yearly_energy_entity) ? this.renderStat(translate(language, "year"), "yearly_energy_entity", "MWh", icons.chart) : null,
-      ((_d = this.config) == null ? void 0 : _d.consumption_day_entity) ? this.renderStat(translate(language, "consumptionDay"), "consumption_day_entity", "kWh", icons.flame) : null,
-      ((_e = this.config) == null ? void 0 : _e.consumption_ytd_entity) ? this.renderStat(translate(language, "consumptionYtd"), "consumption_ytd_entity", "kWh", icons.chart) : null
+      ((_a2 = this.config) == null ? void 0 : _a2.daily_power_entity) ? this.renderStat(translate(language, "dailyPower"), "daily_power_entity", "kWh", icons.flame) : null,
+      ((_b = this.config) == null ? void 0 : _b.ytd_power_entity) ? this.renderStat(translate(language, "ytdPower"), "ytd_power_entity", "kWh", icons.chart) : null,
+      ((_c = this.config) == null ? void 0 : _c.daily_cost_entity) ? this.renderStat(translate(language, "dailyCost"), "daily_cost_entity", "DKK", icons.drop) : null,
+      ((_d = this.config) == null ? void 0 : _d.ytd_cost_entity) ? this.renderStat(translate(language, "ytdCost"), "ytd_cost_entity", "DKK", icons.chart) : null
     ].filter(Boolean);
     if (stats.length === 0) {
       return null;

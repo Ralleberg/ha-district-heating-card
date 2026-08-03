@@ -49,9 +49,7 @@ Designed to be vendor-neutral, the card works with any district heating installa
 - 📈 Large Delta T display
 - ♻️ Automatic efficiency assessment
 - 🏠 Indoor and outdoor temperature support
-- ⚡ Optional power display
-- 📅 Daily energy consumption
-- 📆 Yearly energy consumption
+- ⚡ Optional 2x2 bottom metrics for daily/YTD power and cost
 - 📊 Average Delta T support
 - 🧠 Automatic Delta T calculation when no Delta T sensor is available
 - 🌡️ Automatic seasonal efficiency assessment using Home Assistant history
@@ -125,12 +123,10 @@ name: District Heating
 supply_temp_entity: sensor.fjernvarme_fremlob
 return_temp_entity: sensor.fjernvarme_returlob
 
-power_entity: sensor.fjernvarme_effekt
-
-energy_today_entity: sensor.fjernvarme_energi_i_dag
-yearly_energy_entity: sensor.fjernvarme_forbrug_aar
-consumption_day_entity: sensor.fjernvarme_forbrug_dag
-consumption_ytd_entity: sensor.fjernvarme_forbrug_aargang
+daily_power_entity: sensor.fjernvarme_effekt_dag
+ytd_power_entity: sensor.fjernvarme_effekt_aargang
+daily_cost_entity: sensor.fjernvarme_pris_dag
+ytd_cost_entity: sensor.fjernvarme_pris_aargang
 outdoor_temp_entity: sensor.udetemperatur
 indoor_temp_entity: sensor.indetemperatur
 
@@ -167,11 +163,10 @@ Delta T = Supply Temperature − Return Temperature
 | Entity | Description |
 |----------|-------------|
 | `delta_t_entity` | Measured Delta T |
-| `power_entity` | Current heating power |
-| `energy_today_entity` | Daily energy consumption |
-| `yearly_energy_entity` | Yearly energy consumption |
-| `consumption_day_entity` | Daily heat consumption |
-| `consumption_ytd_entity` | Year-to-date heat consumption |
+| `daily_power_entity` | Daily power/energy value |
+| `ytd_power_entity` | Year-to-date power/energy value |
+| `daily_cost_entity` | Daily cost |
+| `ytd_cost_entity` | Year-to-date cost |
 | `outdoor_temp_entity` | Outdoor temperature |
 | `indoor_temp_entity` | Indoor temperature |
 | `average_delta_t_entity` | Average Delta T |

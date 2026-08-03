@@ -187,25 +187,22 @@ export class HaDistrictHeatingCard extends LitElement {
     const labelUnit = typeof entityId === "string" ? unit(this.hass, entityId, fallbackUnit) : fallbackUnit;
 
     return html`
-      <div class="stat">
+      <button class="stat" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : undefined)}>
         <span class="stat-icon">${icon}</span>
         <span class="stat-text">
           <span class="stat-label">${label}</span>
-          <button class="stat-value" ?disabled=${typeof entityId !== "string"} @click=${() => this.showMoreInfo(typeof entityId === "string" ? entityId : undefined)}>
-            ${formatValue(value, labelUnit)}
-          </button>
+          <span class="stat-value">${formatValue(value, labelUnit)}</span>
         </span>
-      </div>
+      </button>
     `;
   }
 
   private renderStats(language = languageFromHass(this.hass)) {
     const stats = [
-      this.config?.power_entity ? this.renderStat(translate(language, "power"), "power_entity", "kW", icons.flame) : null,
-      this.config?.energy_today_entity ? this.renderStat(translate(language, "today"), "energy_today_entity", "kWh", icons.drop) : null,
-      this.config?.yearly_energy_entity ? this.renderStat(translate(language, "year"), "yearly_energy_entity", "MWh", icons.chart) : null,
-      this.config?.consumption_day_entity ? this.renderStat(translate(language, "consumptionDay"), "consumption_day_entity", "kWh", icons.flame) : null,
-      this.config?.consumption_ytd_entity ? this.renderStat(translate(language, "consumptionYtd"), "consumption_ytd_entity", "kWh", icons.chart) : null,
+      this.config?.daily_power_entity ? this.renderStat(translate(language, "dailyPower"), "daily_power_entity", "kWh", icons.flame) : null,
+      this.config?.ytd_power_entity ? this.renderStat(translate(language, "ytdPower"), "ytd_power_entity", "kWh", icons.chart) : null,
+      this.config?.daily_cost_entity ? this.renderStat(translate(language, "dailyCost"), "daily_cost_entity", "DKK", icons.drop) : null,
+      this.config?.ytd_cost_entity ? this.renderStat(translate(language, "ytdCost"), "ytd_cost_entity", "DKK", icons.chart) : null,
     ].filter(Boolean);
 
     if (stats.length === 0) {
