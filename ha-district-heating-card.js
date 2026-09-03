@@ -644,6 +644,7 @@ const translations = {
     editorTemperatures: "Temperaturer",
     editorSupplyTemp: "Fremløbstemperatur",
     editorReturnTemp: "Returtemperatur",
+    editorExpectedReturnTemp: "Forventet returtemperatur",
     editorDeltaT: "Delta T",
     editorOptionalMetrics: "Valgfrie driftstal",
     editorEnergyToday: "Energi i dag",
@@ -712,6 +713,7 @@ const translations = {
     editorTemperatures: "Temperatures",
     editorSupplyTemp: "Supply temperature",
     editorReturnTemp: "Return temperature",
+    editorExpectedReturnTemp: "Expected return temperature",
     editorDeltaT: "Delta T",
     editorOptionalMetrics: "Optional metrics",
     editorEnergyToday: "Energy today",
@@ -1708,6 +1710,7 @@ let DistrictHeatingCardEditor = class extends i {
       <div class="section">${translate(language, "editorTemperatures")}</div>
       ${this.entityPicker(translate(language, "editorSupplyTemp"), "supply_temp_entity", true)}
       ${this.entityPicker(translate(language, "editorReturnTemp"), "return_temp_entity", true)}
+      ${this.entityPicker(translate(language, "editorExpectedReturnTemp"), "expected_return_temp_entity")}
       ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
       <div class="section">${translate(language, "editorOptionalMetrics")}</div>
@@ -1903,7 +1906,6 @@ let HaDistrictHeatingCard = class extends i {
       `--supply-bg: ${alphaHex(supplyColor, 0.68)}`,
       `--return-color: ${returnColor}`,
       `--return-bg: ${alphaHex(returnColor, 0.68)}`,
-      `--severity-color: ${this.severityColor(result.severity)}`
     ].join(";");
     return b`
       <ha-card style=${style}>
@@ -2217,9 +2219,6 @@ __decorateClass([
 __decorateClass([
   r()
 ], HaDistrictHeatingCard.prototype, "historyAverages", 2);
-__decorateClass([
-  r()
-], HaDistrictHeatingCard.prototype, "historyEndTime", 2);
 HaDistrictHeatingCard = __decorateClass([
   t("ha-district-heating-card")
 ], HaDistrictHeatingCard);

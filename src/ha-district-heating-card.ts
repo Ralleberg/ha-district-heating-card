@@ -6,8 +6,6 @@ import { languageFromHass, translate } from "./i18n";
 import { cardStyles } from "./styles";
 import {
   alphaHex,
-  computeDeltaT,
-  efficiency,
   expectedReturnColor,
   flowColor,
   formatValue,
@@ -15,7 +13,7 @@ import {
   numericState,
   unit,
 } from "./utils";
-import type { DistrictHeatingCardConfig, HistoryPoint, HomeAssistant, LovelaceCardEditor } from "./types";
+import type { DistrictHeatingCardConfig, HomeAssistant, LovelaceCardEditor } from "./types";
 
 const CARD_VERSION = "1.1.0";
 
@@ -25,8 +23,6 @@ export class HaDistrictHeatingCard extends LitElement {
 
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private config?: DistrictHeatingCardConfig;
-  @state() private historyAverages: { indoor?: number; outdoor?: number } = {};
-  private historyKey?: string;
 
   public static getConfigElement(): LovelaceCardEditor {
     return document.createElement("district-heating-card-editor") as LovelaceCardEditor;
@@ -59,15 +55,7 @@ export class HaDistrictHeatingCard extends LitElement {
     const supply = numericState(this.hass, this.config.supply_temp_entity);
     const returned = numericState(this.hass, this.config.return_temp_entity);
     const expectedReturn = numericState(this.hass, this.config.expected_return_temp_entity);
-    const deltaT = computeDeltaT(this.hass, this.config);
-    const averageDeltaT = numericState(this.hass, this.config.average_delta_t_entity);
     const language = languageFromHass(this.hass);
-    const indoorTemp = this.historyAverages.indoor ?? numericState(this.hass, this.config.indoor_temp_entity);
-    const outdoorTemp = this.historyAverages.outdoor ?? numericState(this.hass, this.config.outdoor_temp_entity);
-    const assessment = this.adjustAssessmentForContext(this.config, indoorTemp, outdoorTemp);
-    const assessmentConfig = this.applyExpectedReturnTarget(assessment.config, expectedReturn);
-    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
-    const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
       supply,
       this.config.supply_color_low_temp ?? 50,
@@ -91,7 +79,6 @@ export class HaDistrictHeatingCard extends LitElement {
       `--supply-bg: ${alphaHex(supplyColor, 0.68)}`,
       `--return-color: ${returnColor}`,
       `--return-bg: ${alphaHex(returnColor, 0.68)}`,
-      `--severity-color: ${this.severityColor(result.severity)}`,
     ].join(";");
 
     return html`
@@ -109,10 +96,6 @@ export class HaDistrictHeatingCard extends LitElement {
         </div>
       </ha-card>
     `;
-  }
-
-  protected override updated(): void {
-    this.fetchHistoryAverages();
   }
 
   private renderReading(label: string, value: string, entityId: string | undefined, isReturn = false) {
@@ -221,210 +204,6 @@ export class HaDistrictHeatingCard extends LitElement {
         </div>
       </section>
     `;
-  }
-
-  private applyExpectedReturnTarget(
-    config: DistrictHeatingCardConfig,
-    expectedReturn: number | undefined,
-  ): DistrictHeatingCardConfig {
-    if (expectedReturn === undefined) {
-      return config;
-    }
-
-    return {
-      ...config,
-      good_return_temp: expectedReturn,
-      max_return_temp: expectedReturn + 5,
-    };
-  }
-
-  private adjustAssessmentForContext(
-    config: DistrictHeatingCardConfig,
-    indoorTemp: number | undefined,
-    outdoorTemp: number | undefined,
-  ): {
-    config: DistrictHeatingCardConfig;
-    noteKey?: "seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad";
-  } {
-    if (indoorTemp === undefined || outdoorTemp === undefined) {
-      return { config };
-    }
-
-    const heatDemand = indoorTemp - outdoorTemp;
-    const seasonFactor = this.seasonalDemandFactor(outdoorTemp, heatDemand);
-    const baseMinDeltaT = config.min_delta_t ?? 20;
-    const baseGoodDeltaT = config.good_delta_t ?? 30;
-    const nextConfig: DistrictHeatingCardConfig = {
-      ...config,
-      min_delta_t: Math.max(8, baseMinDeltaT * seasonFactor),
-      good_delta_t: Math.max(12, baseGoodDeltaT * seasonFactor),
-    };
-
-    if (heatDemand > 22 || seasonFactor >= 0.95) {
-      return {
-        config: {
-          ...nextConfig,
-          max_return_temp: (config.max_return_temp ?? 45) - 3,
-          good_return_temp: (config.good_return_temp ?? 35) - 2,
-        },
-        noteKey: "seasonalHighLoad",
-      };
-    }
-
-    if (seasonFactor <= 0.68) {
-      return { config: nextConfig, noteKey: "seasonalLowLoad" };
-    }
-
-    if (seasonFactor < 0.9) {
-      return { config: nextConfig, noteKey: "seasonalModerateLoad" };
-    }
-
-    return { config: nextConfig };
-  }
-
-  private seasonalDemandFactor(outdoorTemp: number, heatDemand: number): number {
-    const month = new Date().getMonth();
-    const isSummer = month >= 4 && month <= 8;
-    const isShoulder = month === 2 || month === 3 || month === 9 || month === 10;
-
-    let factor = isSummer ? 0.62 : isShoulder ? 0.78 : 1;
-
-    if (outdoorTemp >= 17 || heatDemand < 6) {
-      factor = Math.min(factor, 0.58);
-    } else if (outdoorTemp >= 12 || heatDemand < 10) {
-      factor = Math.min(factor, 0.68);
-    } else if (outdoorTemp >= 7 || heatDemand < 14) {
-      factor = Math.min(factor, 0.82);
-    }
-
-    if (outdoorTemp <= 0 || heatDemand > 22) {
-      factor = Math.max(factor, 1);
-    }
-
-    return factor;
-  }
-
-  private async fetchHistoryAverages(): Promise<void> {
-    if (!this.hass?.callWS || !this.config) {
-      return;
-    }
-
-    const entityIds = [this.config.indoor_temp_entity, this.config.outdoor_temp_entity].filter(Boolean) as string[];
-    if (entityIds.length === 0) {
-      return;
-    }
-
-    const endTime = this.districtHeatingDataTime();
-    const bucket = Math.floor(endTime.getTime() / (30 * 60 * 1000));
-    const nextKey = `${entityIds.join("|")}:${bucket}`;
-    if (this.historyKey === nextKey) {
-      return;
-    }
-    this.historyKey = nextKey;
-
-    const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
-
-    try {
-      const history = await this.hass.callWS<Record<string, HistoryPoint[]>>({
-        type: "history/history_during_period",
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        entity_ids: entityIds,
-        minimal_response: true,
-        no_attributes: true,
-      });
-
-      this.historyAverages = {
-        indoor: this.averageHistory(history, this.config.indoor_temp_entity, startTime, endTime),
-        outdoor: this.averageHistory(history, this.config.outdoor_temp_entity, startTime, endTime),
-      };
-    } catch (_error) {
-      this.historyAverages = {};
-    }
-  }
-
-  private districtHeatingDataTime(): Date {
-    const timestamps = [
-      this.config?.supply_temp_entity,
-      this.config?.return_temp_entity,
-      this.config?.delta_t_entity,
-    ]
-      .map((entityId) => (entityId ? this.hass?.states[entityId]?.last_updated : undefined))
-      .filter(Boolean)
-      .map((timestamp) => new Date(timestamp as string).getTime())
-      .filter((timestamp) => Number.isFinite(timestamp));
-
-    if (timestamps.length === 0) {
-      return new Date();
-    }
-
-    return new Date(Math.max(...timestamps));
-  }
-
-  private averageHistory(
-    history: Record<string, HistoryPoint[]>,
-    entityId: string | undefined,
-    startTime: Date,
-    endTime: Date,
-  ): number | undefined {
-    if (!entityId) {
-      return undefined;
-    }
-
-    const points = (history[entityId] ?? [])
-      .map((point) => ({
-        value: Number.parseFloat(String(point.s ?? point.state ?? "").replace(",", ".")),
-        time: this.historyPointTime(point),
-      }))
-      .filter((point) => Number.isFinite(point.value) && point.time !== undefined)
-      .sort((left, right) => (left.time ?? 0) - (right.time ?? 0)) as Array<{ value: number; time: number }>;
-
-    if (points.length === 0) {
-      return numericState(this.hass, entityId);
-    }
-
-    const sampleInterval = 30 * 60 * 1000;
-    const samples: number[] = [];
-    let cursor = 0;
-
-    for (let sampleTime = startTime.getTime(); sampleTime <= endTime.getTime(); sampleTime += sampleInterval) {
-      while (cursor < points.length - 1 && points[cursor + 1].time <= sampleTime) {
-        cursor += 1;
-      }
-
-      const sample = points[cursor].time <= sampleTime ? points[cursor] : points[0];
-      samples.push(sample.value);
-    }
-
-    return samples.reduce((sum, value) => sum + value, 0) / samples.length;
-  }
-
-  private historyPointTime(point: HistoryPoint): number | undefined {
-    if (typeof point.lu === "number") {
-      return point.lu > 1_000_000_000_000 ? point.lu : point.lu * 1000;
-    }
-
-    const timestamp = point.last_updated ?? point.last_changed;
-    if (!timestamp) {
-      return undefined;
-    }
-
-    const parsed = new Date(timestamp).getTime();
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }
-
-  private severityColor(severity: string): string {
-    switch (severity) {
-      case "excellent":
-      case "good":
-        return "var(--dhc-green)";
-      case "warning":
-        return "var(--dhc-yellow)";
-      case "critical":
-        return "var(--dhc-red)";
-      default:
-        return "var(--dhc-muted)";
-    }
   }
 
   private showMoreInfo(entityId: string | undefined): void {
