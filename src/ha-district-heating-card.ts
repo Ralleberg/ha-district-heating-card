@@ -26,7 +26,6 @@ export class HaDistrictHeatingCard extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private config?: DistrictHeatingCardConfig;
   @state() private historyAverages: { indoor?: number; outdoor?: number } = {};
-  @state() private historyEndTime?: number;
   private historyKey?: string;
 
   public static getConfigElement(): LovelaceCardEditor {
@@ -106,8 +105,7 @@ export class HaDistrictHeatingCard extends LitElement {
             ${this.renderPlant(language)}
           </section>
 
-          ${this.renderDiagnostics(result, deltaT, expectedReturn, returned, severityClass, language)}
-          ${this.renderStats(language)}
+          ${this.config.show_secondary ? this.renderStats(language) : null}
         </div>
       </ha-card>
     `;
@@ -220,29 +218,6 @@ export class HaDistrictHeatingCard extends LitElement {
           ${this.renderStat(translate(language, "ytdPower"), ytdPowerEntity, "kWh", icons.chart)}
           ${this.renderStat(translate(language, "dailyCost"), dailyCostEntity, "DKK", icons.drop)}
           ${this.renderStat(translate(language, "ytdCost"), ytdCostEntity, "DKK", icons.chart)}
-        </div>
-      </section>
-    `;
-  }
-
-  private renderDiagnostics(
-    result: ReturnType<typeof efficiency>,
-    deltaT: number | undefined,
-    expectedReturn: number | undefined,
-    returned: number | undefined,
-    severityClass: string,
-    language = languageFromHass(this.hass),
-  ) {
-    const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
-    const deltaEntity = this.config?.delta_t_entity;
-    return html`
-      <section class=${`diagnostics ${severityClass}`} @click=${() => this.showMoreInfo(deltaEntity)}>
-        <div class="summary">
-          <span class="status-icon">${statusIcon}</span>
-          <div>
-            <div class="summary-title">${result.title}</div>
-            <div class="summary-text">DT ${formatValue(deltaT, "°C")}${expectedReturn !== undefined ? html` · ${formatValue(returned, "°C")} / ${formatValue(expectedReturn, "°C")}` : ""}</div>
-          </div>
         </div>
       </section>
     `;
@@ -363,10 +338,8 @@ export class HaDistrictHeatingCard extends LitElement {
         indoor: this.averageHistory(history, this.config.indoor_temp_entity, startTime, endTime),
         outdoor: this.averageHistory(history, this.config.outdoor_temp_entity, startTime, endTime),
       };
-      this.historyEndTime = endTime.getTime();
     } catch (_error) {
       this.historyAverages = {};
-      this.historyEndTime = undefined;
     }
   }
 

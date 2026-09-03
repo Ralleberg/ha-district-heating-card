@@ -762,7 +762,7 @@ const DEFAULT_CONFIG = {
   return_color_low: "#f4f7fb",
   return_color_high: "#3f6ed6",
   show_status: true,
-  show_secondary: true,
+  show_secondary: false,
   show_diagnostics: true
 };
 function mergeConfig(config) {
@@ -901,6 +901,19 @@ function flowColor(value, lowTemp, highTemp, lowColor, highColor) {
   const ratio = clamp((value - lowTemp) / (highTemp - lowTemp || 1), 0, 1);
   return mixHex(lowColor, highColor, ratio);
 }
+function expectedReturnColor(returnTemp, expectedTemp, fallbackColor) {
+  if (returnTemp === void 0 || expectedTemp === void 0) {
+    return fallbackColor;
+  }
+  const difference = returnTemp - expectedTemp;
+  if (difference <= 0) {
+    return "#54c76d";
+  }
+  if (difference <= 3) {
+    return mixHex("#54c76d", "#f4bf45", difference / 3);
+  }
+  return mixHex("#f4bf45", "#ef6f8e", clamp((difference - 3) / 3));
+}
 function alphaHex(color, alpha) {
   const rgb = parseHex(color);
   if (!rgb) {
@@ -972,7 +985,7 @@ const cardStyles = i$3`
   }
 
   .card {
-    padding: clamp(14px, 2.4vw, 22px);
+    padding: 8px 10px 10px;
     color: inherit;
   }
 
@@ -1007,14 +1020,14 @@ const cardStyles = i$3`
   }
 
   .flow {
-    margin: 0 0 clamp(10px, 1.8vw, 14px);
+    margin: 0;
   }
 
   .flow-readings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 6px;
+    gap: 4px;
+    margin-bottom: 0;
   }
 
   .reading {
@@ -1060,9 +1073,9 @@ const cardStyles = i$3`
   }
 
   .value {
-    margin-top: 4px;
+    margin-top: 2px;
     color: var(--dhc-red);
-    font-size: clamp(22px, 6.6vw, 34px);
+    font-size: clamp(20px, 5.8vw, 30px);
     line-height: 1;
     font-weight: 780;
   }
@@ -1078,7 +1091,7 @@ const cardStyles = i$3`
 
   .plant svg {
     width: 100%;
-    max-height: 118px;
+    max-height: 72px;
     height: auto;
     display: block;
     overflow: hidden;
@@ -1424,36 +1437,37 @@ const cardStyles = i$3`
 
   .diagnostics {
     display: block;
-    margin-top: 10px;
-    padding: 12px 14px;
-    border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
-    border-radius: 20px;
-    background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+    margin-top: 2px;
+    padding: 3px 2px 0;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--severity-color) 30%, var(--dhc-border));
+    border-radius: 0;
+    background: transparent;
     cursor: pointer;
   }
 
   .summary {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 10px;
+    gap: 6px;
     align-items: center;
     padding: 0;
   }
 
   .status-icon {
-    width: 30px;
-    height: 30px;
-    border-width: 2px;
+    width: 18px;
+    height: 18px;
+    border-width: 1px;
   }
 
   .summary-title {
-    font-size: clamp(15px, 4.1vw, 18px);
+    display: none;
   }
 
   .summary-text {
-    margin-top: 4px;
-    font-size: clamp(11px, 3.1vw, 13px);
-    line-height: 1.26;
+    margin-top: 0;
+    font-size: 10px;
+    line-height: 1.1;
   }
 
   .summary-note {
@@ -1466,14 +1480,14 @@ const cardStyles = i$3`
   .stats {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 0;
+    margin-top: 8px;
   }
 
   .stat-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
   }
 
   .stat {
@@ -1484,9 +1498,9 @@ const cardStyles = i$3`
     align-items: center;
     min-width: 0;
     width: 100%;
-    padding: 9px 10px;
+    padding: 6px 7px;
     border: 0;
-    border-radius: 14px;
+    border-radius: 10px;
     background: color-mix(in srgb, var(--dhc-background) 82%, transparent);
     color: inherit;
     font: inherit;
@@ -1584,15 +1598,15 @@ const cardStyles = i$3`
 
   @media (max-width: 760px) {
     .card {
-      padding: 14px;
+      padding: 8px 10px 10px;
     }
 
     .flow-readings {
-      gap: 12px;
+      gap: 4px;
     }
 
     .plant svg {
-      min-height: 92px;
+      min-height: 0;
     }
 
     .diagnostics {
@@ -1848,7 +1862,7 @@ let HaDistrictHeatingCard = class extends i {
     this.config = mergeConfig(config);
   }
   getCardSize() {
-    return 3;
+    return 2;
   }
   render() {
     if (!this.config) {
@@ -1856,13 +1870,14 @@ let HaDistrictHeatingCard = class extends i {
     }
     const supply = numericState(this.hass, this.config.supply_temp_entity);
     const returned = numericState(this.hass, this.config.return_temp_entity);
+    const expectedReturn = numericState(this.hass, this.config.expected_return_temp_entity);
     const deltaT = computeDeltaT(this.hass, this.config);
     const averageDeltaT = numericState(this.hass, this.config.average_delta_t_entity);
     const language = languageFromHass(this.hass);
     const indoorTemp = this.historyAverages.indoor ?? numericState(this.hass, this.config.indoor_temp_entity);
     const outdoorTemp = this.historyAverages.outdoor ?? numericState(this.hass, this.config.outdoor_temp_entity);
     const assessment = this.adjustAssessmentForContext(this.config, indoorTemp, outdoorTemp);
-    const assessmentConfig = assessment.config;
+    const assessmentConfig = this.applyExpectedReturnTarget(assessment.config, expectedReturn);
     const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
     const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
@@ -1872,12 +1887,16 @@ let HaDistrictHeatingCard = class extends i {
       this.config.supply_color_low ?? "#f28aa0",
       this.config.supply_color_high ?? "#8f2438"
     );
-    const returnColor = flowColor(
+    const returnColor = expectedReturnColor(
       returned,
-      this.config.return_color_low_temp ?? 0,
-      this.config.return_color_high_temp ?? 35,
-      this.config.return_color_low ?? "#f4f7fb",
-      this.config.return_color_high ?? "#3f6ed6"
+      expectedReturn,
+      flowColor(
+        returned,
+        this.config.return_color_low_temp ?? 0,
+        this.config.return_color_high_temp ?? 35,
+        this.config.return_color_low ?? "#f4f7fb",
+        this.config.return_color_high ?? "#3f6ed6"
+      )
     );
     const style = [
       `--supply-color: ${supplyColor}`,
@@ -1897,8 +1916,7 @@ let HaDistrictHeatingCard = class extends i {
             ${this.renderPlant(language)}
           </section>
 
-          ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
-          ${this.renderStats(language)}
+          ${this.config.show_secondary ? this.renderStats(language) : null}
         </div>
       </ha-card>
     `;
@@ -2010,22 +2028,15 @@ let HaDistrictHeatingCard = class extends i {
       </section>
     `;
   }
-  renderDiagnostics(result, deltaT, severityClass, language = languageFromHass(this.hass), noteKeys = []) {
-    var _a2;
-    const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
-    const deltaEntity = (_a2 = this.config) == null ? void 0 : _a2.delta_t_entity;
-    return b`
-      <section class=${`diagnostics ${severityClass}`} @click=${() => this.showMoreInfo(deltaEntity)}>
-        <div class="summary">
-          <span class="status-icon">${statusIcon}</span>
-          <div>
-            <div class="summary-title">${result.title}</div>
-            <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
-            ${noteKeys.map((noteKey) => b`<div class="summary-note">${translate(language, noteKey)}</div>`)}
-          </div>
-        </div>
-      </section>
-    `;
+  applyExpectedReturnTarget(config, expectedReturn) {
+    if (expectedReturn === void 0) {
+      return config;
+    }
+    return {
+      ...config,
+      good_return_temp: expectedReturn,
+      max_return_temp: expectedReturn + 5
+    };
   }
   adjustAssessmentForContext(config, indoorTemp, outdoorTemp) {
     if (indoorTemp === void 0 || outdoorTemp === void 0) {

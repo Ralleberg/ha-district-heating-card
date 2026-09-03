@@ -23,7 +23,7 @@ export const cardStyles = css`
   }
 
   .card {
-    padding: 12px 14px 14px;
+    padding: 8px 10px 10px;
     color: inherit;
   }
 
@@ -45,26 +45,26 @@ export const cardStyles = css`
   .mini-icon svg,
   .diagnostic-icon svg {
     width: 100%;
-    height: 100%;
+        padding: 8px 10px 10px;
     fill: currentColor;
   }
 
-  h2 {
+        gap: 4px;
     margin: 0;
     font-size: clamp(28px, 7vw, 42px);
     line-height: 1;
-    font-weight: 760;
+        min-height: 0;
     letter-spacing: 0;
   }
 
   .flow {
-    margin: 0 0 6px;
+    margin: 0;
   }
 
   .flow-readings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 4px;
     margin-bottom: 0;
   }
 
@@ -111,9 +111,9 @@ export const cardStyles = css`
   }
 
   .value {
-    margin-top: 4px;
+    margin-top: 2px;
     color: var(--dhc-red);
-    font-size: clamp(22px, 6.6vw, 34px);
+    font-size: clamp(20px, 5.8vw, 30px);
     line-height: 1;
     font-weight: 780;
   }
@@ -129,7 +129,7 @@ export const cardStyles = css`
 
   .plant svg {
     width: 100%;
-    max-height: 92px;
+    max-height: 72px;
     height: auto;
     display: block;
     overflow: hidden;
@@ -475,36 +475,37 @@ export const cardStyles = css`
 
   .diagnostics {
     display: block;
-    margin-top: 6px;
-    padding: 8px 10px;
-    border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
-    border-radius: 12px;
-    background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
+    margin-top: 2px;
+    padding: 3px 2px 0;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--severity-color) 30%, var(--dhc-border));
+    border-radius: 0;
+    background: transparent;
     cursor: pointer;
   }
 
   .summary {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
     padding: 0;
   }
 
   .status-icon {
-    width: 24px;
-    height: 24px;
-    border-width: 2px;
+    width: 18px;
+    height: 18px;
+    border-width: 1px;
   }
 
   .summary-title {
-    font-size: 14px;
+    display: none;
   }
 
   .summary-text {
-    margin-top: 2px;
-    font-size: 11px;
-    line-height: 1.2;
+    margin-top: 0;
+    font-size: 10px;
+    line-height: 1.1;
   }
 
   .summary-note {

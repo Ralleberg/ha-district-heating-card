@@ -17,7 +17,7 @@ export const DEFAULT_CONFIG = {
   return_color_low: "#f4f7fb",
   return_color_high: "#3f6ed6",
   show_status: true,
-  show_secondary: true,
+  show_secondary: false,
   show_diagnostics: true,
 } satisfies Partial<DistrictHeatingCardConfig>;
 
