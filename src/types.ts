@@ -21,6 +21,7 @@ export interface DistrictHeatingCardConfig {
   name?: string;
   supply_temp_entity?: string;
   return_temp_entity?: string;
+  expected_return_temp_entity?: string;
   delta_t_entity?: string;
   power_entity?: string;
   energy_today_entity?: string;

@@ -31,6 +31,7 @@ export class DistrictHeatingCardEditor extends LitElement {
       <div class="section">${translate(language, "editorTemperatures")}</div>
       ${this.entityPicker(translate(language, "editorSupplyTemp"), "supply_temp_entity", true)}
       ${this.entityPicker(translate(language, "editorReturnTemp"), "return_temp_entity", true)}
+      ${this.entityPicker(translate(language, "editorExpectedReturnTemp"), "expected_return_temp_entity")}
       ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
       <div class="section">${translate(language, "editorOptionalMetrics")}</div>

@@ -220,6 +220,27 @@ export function flowColor(
   return mixHex(lowColor, highColor, ratio);
 }
 
+export function expectedReturnColor(
+  returnTemp: number | undefined,
+  expectedTemp: number | undefined,
+  fallbackColor: string,
+): string {
+  if (returnTemp === undefined || expectedTemp === undefined) {
+    return fallbackColor;
+  }
+
+  const difference = returnTemp - expectedTemp;
+  if (difference <= 0) {
+    return "#54c76d";
+  }
+
+  if (difference <= 3) {
+    return mixHex("#54c76d", "#f4bf45", difference / 3);
+  }
+
+  return mixHex("#f4bf45", "#ef6f8e", clamp((difference - 3) / 3));
+}
+
 export function alphaHex(color: string, alpha: number): string {
   const rgb = parseHex(color);
   if (!rgb) {

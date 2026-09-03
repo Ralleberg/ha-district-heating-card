@@ -8,6 +8,7 @@ import {
   alphaHex,
   computeDeltaT,
   efficiency,
+  expectedReturnColor,
   flowColor,
   formatValue,
   mergeConfig,
@@ -48,7 +49,7 @@ export class HaDistrictHeatingCard extends LitElement {
   }
 
   public getCardSize(): number {
-    return 3;
+    return 2;
   }
 
   protected override render() {
@@ -58,13 +59,14 @@ export class HaDistrictHeatingCard extends LitElement {
 
     const supply = numericState(this.hass, this.config.supply_temp_entity);
     const returned = numericState(this.hass, this.config.return_temp_entity);
+    const expectedReturn = numericState(this.hass, this.config.expected_return_temp_entity);
     const deltaT = computeDeltaT(this.hass, this.config);
     const averageDeltaT = numericState(this.hass, this.config.average_delta_t_entity);
     const language = languageFromHass(this.hass);
     const indoorTemp = this.historyAverages.indoor ?? numericState(this.hass, this.config.indoor_temp_entity);
     const outdoorTemp = this.historyAverages.outdoor ?? numericState(this.hass, this.config.outdoor_temp_entity);
     const assessment = this.adjustAssessmentForContext(this.config, indoorTemp, outdoorTemp);
-    const assessmentConfig = assessment.config;
+    const assessmentConfig = this.applyExpectedReturnTarget(assessment.config, expectedReturn);
     const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
     const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
@@ -74,12 +76,16 @@ export class HaDistrictHeatingCard extends LitElement {
       this.config.supply_color_low ?? "#f28aa0",
       this.config.supply_color_high ?? "#8f2438",
     );
-    const returnColor = flowColor(
+    const returnColor = expectedReturnColor(
       returned,
-      this.config.return_color_low_temp ?? 0,
-      this.config.return_color_high_temp ?? 35,
-      this.config.return_color_low ?? "#f4f7fb",
-      this.config.return_color_high ?? "#3f6ed6",
+      expectedReturn,
+      flowColor(
+        returned,
+        this.config.return_color_low_temp ?? 0,
+        this.config.return_color_high_temp ?? 35,
+        this.config.return_color_low ?? "#f4f7fb",
+        this.config.return_color_high ?? "#3f6ed6",
+      ),
     );
     const style = [
       `--supply-color: ${supplyColor}`,
@@ -100,7 +106,7 @@ export class HaDistrictHeatingCard extends LitElement {
             ${this.renderPlant(language)}
           </section>
 
-          ${this.renderDiagnostics(result, deltaT, severityClass, language, this.diagnosticNotes(assessment.noteKey))}
+          ${this.renderDiagnostics(result, deltaT, expectedReturn, returned, severityClass, language)}
           ${this.renderStats(language)}
         </div>
       </ha-card>
@@ -212,8 +218,6 @@ export class HaDistrictHeatingCard extends LitElement {
         <div class="stat-row">
           ${this.renderStat(translate(language, "dailyPower"), dailyPowerEntity, "kWh", icons.flame)}
           ${this.renderStat(translate(language, "ytdPower"), ytdPowerEntity, "kWh", icons.chart)}
-        </div>
-        <div class="stat-row">
           ${this.renderStat(translate(language, "dailyCost"), dailyCostEntity, "DKK", icons.drop)}
           ${this.renderStat(translate(language, "ytdCost"), ytdCostEntity, "DKK", icons.chart)}
         </div>
@@ -224,9 +228,10 @@ export class HaDistrictHeatingCard extends LitElement {
   private renderDiagnostics(
     result: ReturnType<typeof efficiency>,
     deltaT: number | undefined,
+    expectedReturn: number | undefined,
+    returned: number | undefined,
     severityClass: string,
     language = languageFromHass(this.hass),
-    noteKeys: Array<"seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | "delayedMeterData"> = [],
   ) {
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
     const deltaEntity = this.config?.delta_t_entity;
@@ -236,12 +241,26 @@ export class HaDistrictHeatingCard extends LitElement {
           <span class="status-icon">${statusIcon}</span>
           <div>
             <div class="summary-title">${result.title}</div>
-            <div class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${result.message}</div>
-            ${noteKeys.map((noteKey) => html`<div class="summary-note">${translate(language, noteKey)}</div>`)}
+            <div class="summary-text">DT ${formatValue(deltaT, "°C")}${expectedReturn !== undefined ? html` · ${formatValue(returned, "°C")} / ${formatValue(expectedReturn, "°C")}` : ""}</div>
           </div>
         </div>
       </section>
     `;
+  }
+
+  private applyExpectedReturnTarget(
+    config: DistrictHeatingCardConfig,
+    expectedReturn: number | undefined,
+  ): DistrictHeatingCardConfig {
+    if (expectedReturn === undefined) {
+      return config;
+    }
+
+    return {
+      ...config,
+      good_return_temp: expectedReturn,
+      max_return_temp: expectedReturn + 5,
+    };
   }
 
   private adjustAssessmentForContext(
@@ -308,21 +327,6 @@ export class HaDistrictHeatingCard extends LitElement {
     }
 
     return factor;
-  }
-
-  private diagnosticNotes(
-    seasonNote: "seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | undefined,
-  ): Array<"seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | "delayedMeterData"> {
-    const notes: Array<"seasonalLowLoad" | "seasonalModerateLoad" | "seasonalHighLoad" | "delayedMeterData"> = [];
-    if (seasonNote) {
-      notes.push(seasonNote);
-    }
-
-    if (this.historyEndTime && Date.now() - this.historyEndTime > 18 * 60 * 60 * 1000) {
-      notes.push("delayedMeterData");
-    }
-
-    return notes;
   }
 
   private async fetchHistoryAverages(): Promise<void> {

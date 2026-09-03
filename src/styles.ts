@@ -23,7 +23,7 @@ export const cardStyles = css`
   }
 
   .card {
-    padding: clamp(14px, 2.4vw, 22px);
+    padding: 12px 14px 14px;
     color: inherit;
   }
 
@@ -58,14 +58,14 @@ export const cardStyles = css`
   }
 
   .flow {
-    margin: 0 0 clamp(10px, 1.8vw, 14px);
+    margin: 0 0 6px;
   }
 
   .flow-readings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 6px;
+    gap: 8px;
+    margin-bottom: 0;
   }
 
   .reading {
@@ -107,7 +107,7 @@ export const cardStyles = css`
   }
 
   .return .label {
-    color: var(--dhc-blue);
+    color: var(--return-color, var(--dhc-blue));
   }
 
   .value {
@@ -119,7 +119,7 @@ export const cardStyles = css`
   }
 
   .return .value {
-    color: var(--dhc-blue);
+    color: var(--return-color, var(--dhc-blue));
   }
 
   .plant {
@@ -129,7 +129,7 @@ export const cardStyles = css`
 
   .plant svg {
     width: 100%;
-    max-height: 118px;
+    max-height: 92px;
     height: auto;
     display: block;
     overflow: hidden;
@@ -475,10 +475,10 @@ export const cardStyles = css`
 
   .diagnostics {
     display: block;
-    margin-top: 10px;
-    padding: 12px 14px;
+    margin-top: 6px;
+    padding: 8px 10px;
     border: 1px solid color-mix(in srgb, var(--severity-color) 34%, var(--dhc-border));
-    border-radius: 20px;
+    border-radius: 12px;
     background: linear-gradient(145deg, color-mix(in srgb, var(--severity-color) 10%, transparent), rgba(255, 255, 255, 0.025)), var(--dhc-panel-bg);
     cursor: pointer;
   }
@@ -486,25 +486,25 @@ export const cardStyles = css`
   .summary {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     padding: 0;
   }
 
   .status-icon {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     border-width: 2px;
   }
 
   .summary-title {
-    font-size: clamp(15px, 4.1vw, 18px);
+    font-size: 14px;
   }
 
   .summary-text {
-    margin-top: 4px;
-    font-size: clamp(11px, 3.1vw, 13px);
-    line-height: 1.26;
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.2;
   }
 
   .summary-note {
@@ -517,14 +517,14 @@ export const cardStyles = css`
   .stats {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 0;
+    margin-top: 8px;
   }
 
   .stat-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
   }
 
   .stat {
@@ -535,9 +535,9 @@ export const cardStyles = css`
     align-items: center;
     min-width: 0;
     width: 100%;
-    padding: 9px 10px;
+    padding: 6px 7px;
     border: 0;
-    border-radius: 14px;
+    border-radius: 10px;
     background: color-mix(in srgb, var(--dhc-background) 82%, transparent);
     color: inherit;
     font: inherit;
@@ -640,6 +640,11 @@ export const cardStyles = css`
 
     .flow-readings {
       gap: 12px;
+    }
+
+    .stat-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
     }
 
     .plant svg {

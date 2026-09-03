@@ -122,6 +122,7 @@ name: District Heating
 
 supply_temp_entity: sensor.fjernvarme_fremlob
 return_temp_entity: sensor.fjernvarme_returlob
+expected_return_temp_entity: sensor.fjernvarme_forventet_returlob
 
 daily_power_entity: sensor.fjernvarme_effekt_dag
 ytd_power_entity: sensor.fjernvarme_effekt_aargang
@@ -155,6 +156,7 @@ Delta T = Supply Temperature − Return Temperature
 |----------|-------------|
 | `supply_temp_entity` | Supply temperature |
 | `return_temp_entity` | Return temperature |
+| `expected_return_temp_entity` | Optional expected return temperature used for dynamic status colors and limits |
 
 ---
 
@@ -183,6 +185,8 @@ The four bottom metrics render as two fixed rows with two boxes per row. Older k
 | `good_delta_t` | 30 | Good Delta T |
 | `max_return_temp` | 45 | Highest acceptable return temperature |
 | `good_return_temp` | 35 | Good return temperature |
+
+When `expected_return_temp_entity` is configured, the return flow is green at or below the expected temperature, transitions through yellow up to 3 °C above it, and becomes red above that. The configured return thresholds remain the fallback when the entity is unavailable.
 
 ---
 
