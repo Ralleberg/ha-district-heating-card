@@ -1825,7 +1825,7 @@ var __decorateClass = (decorators, target, key, kind) => {
   if (kind && result) __defProp(target, key, result);
   return result;
 };
-const CARD_VERSION = "0.1.0";
+const CARD_VERSION = "1.1.0";
 let HaDistrictHeatingCard = class extends i {
   constructor() {
     super(...arguments);
