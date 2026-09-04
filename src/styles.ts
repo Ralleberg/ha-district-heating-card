@@ -45,15 +45,15 @@ export const cardStyles = css`
   .mini-icon svg,
   .diagnostic-icon svg {
     width: 100%;
-        padding: 8px 10px 10px;
+    height: 100%;
     fill: currentColor;
   }
 
-        gap: 4px;
+  h2 {
     margin: 0;
     font-size: clamp(28px, 7vw, 42px);
     line-height: 1;
-        min-height: 0;
+    font-weight: 760;
     letter-spacing: 0;
   }
 
@@ -474,6 +474,8 @@ export const cardStyles = css`
   }
 
   .diagnostics {
+    appearance: none;
+    width: 100%;
     display: block;
     margin-top: 2px;
     padding: 3px 2px 0;
@@ -481,7 +483,14 @@ export const cardStyles = css`
     border-top: 1px solid color-mix(in srgb, var(--severity-color) 30%, var(--dhc-border));
     border-radius: 0;
     background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
+  }
+
+  .diagnostics:disabled {
+    cursor: default;
   }
 
   .summary {
@@ -524,7 +533,7 @@ export const cardStyles = css`
 
   .stat-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px;
   }
 

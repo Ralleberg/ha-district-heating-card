@@ -6,7 +6,9 @@ import { languageFromHass, translate } from "./i18n";
 import { cardStyles } from "./styles";
 import {
   alphaHex,
+  computeDeltaT,
   expectedReturnColor,
+  efficiency,
   flowColor,
   formatValue,
   mergeConfig,
@@ -15,7 +17,7 @@ import {
 } from "./utils";
 import type { DistrictHeatingCardConfig, HomeAssistant, LovelaceCardEditor } from "./types";
 
-const CARD_VERSION = "1.1.0";
+const CARD_VERSION = "1.1.1";
 
 @customElement("ha-district-heating-card")
 export class HaDistrictHeatingCard extends LitElement {
@@ -55,7 +57,12 @@ export class HaDistrictHeatingCard extends LitElement {
     const supply = numericState(this.hass, this.config.supply_temp_entity);
     const returned = numericState(this.hass, this.config.return_temp_entity);
     const expectedReturn = numericState(this.hass, this.config.expected_return_temp_entity);
+    const deltaT = computeDeltaT(this.hass, this.config);
+    const averageDeltaT = numericState(this.hass, this.config.average_delta_t_entity);
     const language = languageFromHass(this.hass);
+    const assessmentConfig = this.applyExpectedReturnTarget(this.config, expectedReturn);
+    const result = efficiency(assessmentConfig, averageDeltaT ?? deltaT, returned, language);
+    const severityClass = `severity-${result.severity}`;
     const supplyColor = flowColor(
       supply,
       this.config.supply_color_low_temp ?? 50,
@@ -92,6 +99,7 @@ export class HaDistrictHeatingCard extends LitElement {
             ${this.renderPlant(language)}
           </section>
 
+          ${this.config.show_diagnostics ? this.renderDiagnostics(result, averageDeltaT ?? deltaT, expectedReturn, severityClass, language) : null}
           ${this.config.show_secondary ? this.renderStats(language) : null}
         </div>
       </ha-card>
@@ -199,11 +207,48 @@ export class HaDistrictHeatingCard extends LitElement {
         <div class="stat-row">
           ${this.renderStat(translate(language, "dailyPower"), dailyPowerEntity, "kWh", icons.flame)}
           ${this.renderStat(translate(language, "ytdPower"), ytdPowerEntity, "kWh", icons.chart)}
+        </div>
+        <div class="stat-row">
           ${this.renderStat(translate(language, "dailyCost"), dailyCostEntity, "DKK", icons.drop)}
           ${this.renderStat(translate(language, "ytdCost"), ytdCostEntity, "DKK", icons.chart)}
         </div>
       </section>
     `;
+  }
+
+  private renderDiagnostics(
+    result: ReturnType<typeof efficiency>,
+    deltaT: number | undefined,
+    expectedReturn: number | undefined,
+    severityClass: string,
+    language = languageFromHass(this.hass),
+  ) {
+    const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
+    const targetText = expectedReturn !== undefined
+      ? translate(language, "expectedReturnTarget", { value: expectedReturn.toFixed(1) })
+      : result.message;
+
+    return html`
+      <button class=${`diagnostics ${severityClass}`} ?disabled=${!this.config?.delta_t_entity} @click=${() => this.showMoreInfo(this.config?.delta_t_entity)}>
+        <span class="status-icon">${statusIcon}</span>
+        <span class="summary">
+          <span class="summary-title">${result.title}</span>
+          <span class="summary-text">${formatValue(deltaT, "°C")} ${translate(language, "cooling")} · ${targetText}</span>
+        </span>
+      </button>
+    `;
+  }
+
+  private applyExpectedReturnTarget(config: DistrictHeatingCardConfig, expectedReturn: number | undefined): DistrictHeatingCardConfig {
+    if (expectedReturn === undefined) {
+      return config;
+    }
+
+    return {
+      ...config,
+      good_return_temp: expectedReturn,
+      max_return_temp: expectedReturn + 3,
+    };
   }
 
   private showMoreInfo(entityId: string | undefined): void {
