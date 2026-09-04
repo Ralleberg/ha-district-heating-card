@@ -140,7 +140,7 @@ max_return_temp: 45
 good_return_temp: 35
 ```
 
-If `delta_t_entity` is not configured, the card automatically calculates:
+Delta T is automatically calculated:
 
 ```text
 Delta T = Supply Temperature − Return Temperature
@@ -164,7 +164,6 @@ Delta T = Supply Temperature − Return Temperature
 
 | Entity | Description |
 |----------|-------------|
-| `delta_t_entity` | Measured Delta T |
 | `daily_power_entity` | Daily power/energy value |
 | `ytd_power_entity` | Year-to-date power/energy value |
 | `daily_cost_entity` | Daily cost |
@@ -174,6 +173,8 @@ Delta T = Supply Temperature − Return Temperature
 | `average_delta_t_entity` | Average Delta T |
 
 The four bottom metrics render as two fixed rows with two boxes per row. Older keys are still accepted as fallbacks: `energy_today_entity`, `yearly_energy_entity`, `consumption_day_entity`, and `consumption_ytd_entity`.
+
+The legacy `delta_t_entity` key is still accepted in YAML for existing installations, but the visual editor no longer exposes it because the card calculates Delta T from supply and return temperature.
 
 ---
 

@@ -1727,7 +1727,6 @@ let DistrictHeatingCardEditor = class extends i {
       ${this.entityPicker(translate(language, "editorSupplyTemp"), "supply_temp_entity", true)}
       ${this.entityPicker(translate(language, "editorReturnTemp"), "return_temp_entity", true)}
       ${this.entityPicker(translate(language, "editorExpectedReturnTemp"), "expected_return_temp_entity")}
-      ${this.entityPicker(translate(language, "editorDeltaT"), "delta_t_entity")}
 
       <div class="section">${translate(language, "editorOptionalMetrics")}</div>
       ${this.entityPicker(translate(language, "editorDailyPower"), "daily_power_entity")}
