@@ -99,7 +99,7 @@ export class HaDistrictHeatingCard extends LitElement {
             ${this.renderPlant(language)}
           </section>
 
-          ${this.config.show_diagnostics ? this.renderDiagnostics(result, averageDeltaT ?? deltaT, expectedReturn, severityClass, language) : null}
+          ${this.config.show_diagnostics ? this.renderDiagnostics(result, averageDeltaT ?? deltaT, expectedReturn, returned, severityClass, language) : null}
           ${this.config.show_secondary ? this.renderStats(language) : null}
         </div>
       </ha-card>
@@ -220,16 +220,18 @@ export class HaDistrictHeatingCard extends LitElement {
     result: ReturnType<typeof efficiency>,
     deltaT: number | undefined,
     expectedReturn: number | undefined,
+    returnTemp: number | undefined,
     severityClass: string,
     language = languageFromHass(this.hass),
   ) {
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
+    const hasAssessment = deltaT !== undefined && returnTemp !== undefined;
     const targetText = expectedReturn !== undefined
       ? translate(language, "expectedReturnTarget", { value: expectedReturn.toFixed(1) })
-      : result.message;
+      : hasAssessment ? result.message : translate(language, "waitingForData");
 
     return html`
-      <button class=${`diagnostics ${severityClass}`} ?disabled=${!this.config?.delta_t_entity} @click=${() => this.showMoreInfo(this.config?.delta_t_entity)}>
+      <button class=${`diagnostics ${severityClass}`} ?disabled=${!this.config?.return_temp_entity} @click=${() => this.showMoreInfo(this.config?.return_temp_entity)}>
         <span class="status-icon">${statusIcon}</span>
         <span class="summary">
           <span class="summary-title">${result.title}</span>

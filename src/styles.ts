@@ -476,7 +476,10 @@ export const cardStyles = css`
   .diagnostics {
     appearance: none;
     width: 100%;
-    display: block;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 6px;
+    align-items: center;
     margin-top: 2px;
     padding: 3px 2px 0;
     border: 0;
@@ -494,17 +497,25 @@ export const cardStyles = css`
   }
 
   .summary {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px;
-    align-items: center;
+    display: block;
+    min-width: 0;
     padding: 0;
   }
 
   .status-icon {
+    display: grid;
+    place-items: center;
     width: 18px;
     height: 18px;
     border-width: 1px;
+    min-width: 18px;
+    overflow: hidden;
+  }
+
+  .status-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .summary-title {

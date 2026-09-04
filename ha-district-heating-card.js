@@ -622,6 +622,7 @@ const translations = {
     warningTitle: "Kan optimeres",
     criticalTitle: "Lav effektivitet",
     missingMessage: "Tilføj fremløb, returløb og eventuelt Delta T for at vurdere driften.",
+    waitingForData: "Afventer data",
     lowDeltaHighReturn: "Afkølingen er under {minDeltaT} °C, og returtemperaturen er over {maxReturnTemp} °C.",
     lowDelta: "Afkølingen er under minimum på {minDeltaT} °C. Returtemperaturen er acceptabel.",
     highReturn: "Returtemperaturen er over maksimum på {maxReturnTemp} °C. Afkølingen er acceptabel.",
@@ -692,6 +693,7 @@ const translations = {
     warningTitle: "Can be optimized",
     criticalTitle: "Low efficiency",
     missingMessage: "Add supply, return and optionally Delta T to assess operation.",
+    waitingForData: "Waiting for data",
     lowDeltaHighReturn: "Cooling is below {minDeltaT} °C, and return temperature is above {maxReturnTemp} °C.",
     lowDelta: "Cooling is below the minimum of {minDeltaT} °C. Return temperature is acceptable.",
     highReturn: "Return temperature is above the maximum of {maxReturnTemp} °C. Cooling is acceptable.",
@@ -1442,7 +1444,10 @@ const cardStyles = i$3`
   .diagnostics {
     appearance: none;
     width: 100%;
-    display: block;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 6px;
+    align-items: center;
     margin-top: 2px;
     padding: 3px 2px 0;
     border: 0;
@@ -1460,17 +1465,25 @@ const cardStyles = i$3`
   }
 
   .summary {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px;
-    align-items: center;
+    display: block;
+    min-width: 0;
     padding: 0;
   }
 
   .status-icon {
+    display: grid;
+    place-items: center;
     width: 18px;
     height: 18px;
     border-width: 1px;
+    min-width: 18px;
+    overflow: hidden;
+  }
+
+  .status-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .summary-title {
@@ -1926,7 +1939,7 @@ let HaDistrictHeatingCard = class extends i {
             ${this.renderPlant(language)}
           </section>
 
-          ${this.config.show_diagnostics ? this.renderDiagnostics(result, averageDeltaT ?? deltaT, expectedReturn, severityClass, language) : null}
+          ${this.config.show_diagnostics ? this.renderDiagnostics(result, averageDeltaT ?? deltaT, expectedReturn, returned, severityClass, language) : null}
           ${this.config.show_secondary ? this.renderStats(language) : null}
         </div>
       </ha-card>
@@ -2036,14 +2049,15 @@ let HaDistrictHeatingCard = class extends i {
       </section>
     `;
   }
-  renderDiagnostics(result, deltaT, expectedReturn, severityClass, language = languageFromHass(this.hass)) {
+  renderDiagnostics(result, deltaT, expectedReturn, returnTemp, severityClass, language = languageFromHass(this.hass)) {
     var _a2;
     const statusIcon = result.severity === "critical" || result.severity === "warning" ? icons.alert : icons.check;
-    const targetText = expectedReturn !== void 0 ? translate(language, "expectedReturnTarget", { value: expectedReturn.toFixed(1) }) : result.message;
+    const hasAssessment = deltaT !== void 0 && returnTemp !== void 0;
+    const targetText = expectedReturn !== void 0 ? translate(language, "expectedReturnTarget", { value: expectedReturn.toFixed(1) }) : hasAssessment ? result.message : translate(language, "waitingForData");
     return b`
-      <button class=${`diagnostics ${severityClass}`} ?disabled=${!((_a2 = this.config) == null ? void 0 : _a2.delta_t_entity)} @click=${() => {
+      <button class=${`diagnostics ${severityClass}`} ?disabled=${!((_a2 = this.config) == null ? void 0 : _a2.return_temp_entity)} @click=${() => {
       var _a3;
-      return this.showMoreInfo((_a3 = this.config) == null ? void 0 : _a3.delta_t_entity);
+      return this.showMoreInfo((_a3 = this.config) == null ? void 0 : _a3.return_temp_entity);
     }}>
         <span class="status-icon">${statusIcon}</span>
         <span class="summary">
